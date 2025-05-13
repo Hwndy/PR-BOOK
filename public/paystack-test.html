@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Paystack Test</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    button {
+      background-color: #0066cc;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    button:hover {
+      background-color: #0055aa;
+    }
+    .status {
+      margin-top: 20px;
+      padding: 10px;
+      border-radius: 4px;
+    }
+    .success {
+      background-color: #d4edda;
+      color: #155724;
+    }
+    .error {
+      background-color: #f8d7da;
+      color: #721c24;
+    }
+    .info {
+      background-color: #d1ecf1;
+      color: #0c5460;
+    }
+  </style>
+</head>
+<body>
+  <h1>Paystack Integration Test</h1>
+  
+  <div>
+    <p>This page tests if the Paystack script loads correctly.</p>
+    
+    <div>
+      <h3>Test Paystack Script Loading</h3>
+      <button id="loadScript">Load Paystack Script</button>
+      <div id="scriptStatus" class="status"></div>
+    </div>
+    
+    <div style="margin-top: 30px;">
+      <h3>Test Paystack Payment</h3>
+      <form id="paymentForm">
+        <div style="margin-bottom: 10px;">
+          <label for="email">Email Address:</label>
+          <input type="email" id="email" value="customer@example.com" style="width: 100%; padding: 8px; margin-top: 5px;">
+        </div>
+        <div style="margin-bottom: 10px;">
+          <label for="amount">Amount (NGN):</label>
+          <input type="number" id="amount" value="2999" style="width: 100%; padding: 8px; margin-top: 5px;">
+        </div>
+        <button type="button" id="payWithPaystack">Pay with Paystack</button>
+      </form>
+      <div id="paymentStatus" class="status"></div>
+    </div>
+  </div>
+
+  <script>
+    // Function to load Paystack script
+    function loadPaystackScript() {
+      return new Promise((resolve, reject) => {
+        const scriptStatus = document.getElementById('scriptStatus');
+        
+        // Check if script already exists
+        if (document.querySelector('script[src="https://js.paystack.co/v1/inline.js"]')) {
+          scriptStatus.textContent = 'Script already loaded';
+          scriptStatus.className = 'status info';
+          
+          if (typeof window.PaystackPop !== 'undefined') {
+            scriptStatus.textContent = 'Paystack script already loaded and initialized';
+            scriptStatus.className = 'status success';
+            resolve();
+          } else {
+            scriptStatus.textContent = 'Script loaded but PaystackPop is undefined';
+            scriptStatus.className = 'status error';
+            reject(new Error('PaystackPop is undefined'));
+          }
+          return;
+        }
+        
+        scriptStatus.textContent = 'Loading script...';
+        scriptStatus.className = 'status info';
+        
+        const script = document.createElement('script');
+        script.src = 'https://js.paystack.co/v1/inline.js';
+        script.async = true;
+        
+        script.onload = () => {
+          scriptStatus.textContent = 'Script loaded, checking initialization...';
+          
+          // Give it a moment to initialize
+          setTimeout(() => {
+            if (typeof window.PaystackPop !== 'undefined') {
+              scriptStatus.textContent = 'Paystack script loaded and initialized successfully!';
+              scriptStatus.className = 'status success';
+              resolve();
+            } else {
+              scriptStatus.textContent = 'Script loaded but PaystackPop is undefined';
+              scriptStatus.className = 'status error';
+              reject(new Error('PaystackPop is undefined'));
+            }
+          }, 1000);
+        };
+        
+        script.onerror = () => {
+          scriptStatus.textContent = 'Failed to load Paystack script';
+          scriptStatus.className = 'status error';
+          reject(new Error('Failed to load script'));
+        };
+        
+        document.head.appendChild(script);
+      });
+    }
+    
+    // Load script button handler
+    document.getElementById('loadScript').addEventListener('click', () => {
+      loadPaystackScript()
+        .then(() => {
+          console.log('Paystack script loaded successfully');
+        })
+        .catch(error => {
+          console.error('Error loading Paystack script:', error);
+        });
+    });
+    
+    // Pay with Paystack button handler
+    document.getElementById('payWithPaystack').addEventListener('click', async () => {
+      const paymentStatus = document.getElementById('paymentStatus');
+      const email = document.getElementById('email').value;
+      const amount = document.getElementById('amount').value;
+      
+      if (!email || !amount) {
+        paymentStatus.textContent = 'Please provide email and amount';
+        paymentStatus.className = 'status error';
+        return;
+      }
+      
+      paymentStatus.textContent = 'Initializing payment...';
+      paymentStatus.className = 'status info';
+      
+      try {
+        // Load script first if not already loaded
+        if (typeof window.PaystackPop === 'undefined') {
+          await loadPaystackScript();
+        }
+        
+        if (typeof window.PaystackPop === 'undefined') {
+          throw new Error('PaystackPop is still undefined after loading script');
+        }
+        
+        // Generate a reference
+        const reference = 'TEST_' + Date.now() + '_' + Math.floor(Math.random() * 1000000);
+        
+        // Initialize Paystack payment
+        const paystack = new window.PaystackPop();
+        paystack.newTransaction({
+          key: 'pk_test_e78a4212fea05f0b8718311dcee69a1bcf881dd3',
+          email: email,
+          amount: parseInt(amount) * 100, // Convert to kobo
+          currency: 'NGN',
+          reference: reference,
+          metadata: {
+            product_name: 'Test Product',
+            is_test: true
+          },
+          callback: function(response) {
+            paymentStatus.textContent = 'Payment successful! Reference: ' + response.reference;
+            paymentStatus.className = 'status success';
+          },
+          onClose: function() {
+            paymentStatus.textContent = 'Payment window closed';
+            paymentStatus.className = 'status info';
+          }
+        });
+      } catch (error) {
+        console.error('Payment error:', error);
+        paymentStatus.textContent = 'Error: ' + error.message;
+        paymentStatus.className = 'status error';
+      }
+    });
+  </script>
+</body>
+</html>
