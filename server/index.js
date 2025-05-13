@@ -593,7 +593,7 @@ app.get('/payment-success', (req, res) => {
 
   // Redirect to the client-side payment success page
   // The Vite development server is running on port 5173
-  // res.redirect(`http://localhost:5173/payment-success?reference=${reference || trxref}`);
+ 
   res.redirect(`https://thescienceofpublicrelations.vercel.app/payment-success?reference=${reference || trxref}`);
 
 });
