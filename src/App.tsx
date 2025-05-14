@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import Services from './components/Services';
-import CaseStudies from './components/CaseStudies';
+// import CaseStudies from './components/CaseStudies';
 import About from './components/About';
 import Blog from './components/Blog';
 import Contact from './components/Contact';
@@ -14,6 +14,7 @@ import PaymentPage from './components/PaymentPage';
 import PaymentSuccess from './components/PaymentSuccess';
 import Speaking from './components/Speaking';
 import Podcast from './components/Podcast';
+import HomeSummary from './components/HomeSummary';
 import './index.css';
 
 function App() {
@@ -25,9 +26,10 @@ function App() {
           <Route path="/" element={
             <>
               <Hero />
+              <HomeSummary />
               <Book />
               <Services />
-              <CaseStudies />
+              {/* <CaseStudies /> */}
             </>
           } />
           <Route path="/about" element={<About />} />

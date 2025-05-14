@@ -1,13 +1,17 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { ChevronRight, Check } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import PurchaseModal from './PurchaseModal';
 
 const Book = () => {
   const navigate = useNavigate();
+  const [isPurchaseModalOpen, setIsPurchaseModalOpen] = useState(false);
+  const [isPreorderOnly, setIsPreorderOnly] = useState(false);
 
   const handlePurchase = () => {
-    // Navigate to the book page with pre-order section
-    navigate('/book#pre-order');
+    // Open purchase modal with all formats
+    setIsPreorderOnly(false);
+    setIsPurchaseModalOpen(true);
   };
 
   return (
@@ -50,12 +54,12 @@ const Book = () => {
             </div>
 
             <div className="bg-blue-50 rounded-lg p-4 sm:p-6 mb-6 sm:mb-8">
-              <h3 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4">Bonus Materials</h3>
+              <h3 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4">This Book is for</h3>
               <ul className="space-y-2 sm:space-y-3">
                 {[
-                  'PR Measurement Toolkit ($97 value)',
-                  'Video Masterclass Series ($147 value)',
-                  'Private Community Access ($53 value)'
+    'Students of mass communication and Public relations who want clarity (not confusion) in measurement and evaluation',
+                  'Rising PR executives who are tired of “just reporting mentions” and want to lead with insight',
+                  'Senior professionals looking to sharpen their edge and embrace global best practices in measurement'
                 ].map((item, index) => (
                   <li key={index} className="flex items-center">
                     <Check className="h-4 w-4 sm:h-5 sm:w-5 text-blue-500 mr-2 flex-shrink-0" />
@@ -70,17 +74,20 @@ const Book = () => {
                 onClick={handlePurchase}
                 className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 sm:py-3 px-6 sm:px-8 rounded-md shadow-md transition duration-300 flex items-center justify-center sm:justify-start touch-target"
               >
-                View Pre-order Options
+                Purchase Now
                 <ChevronRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5" />
               </button>
-              <div className="text-gray-500 text-sm sm:text-base">
-                <span className="line-through">₦3,999</span>
-                <span className="ml-2 text-green-600">Save 25%</span>
-              </div>
             </div>
           </div>
         </div>
       </div>
+
+      {/* Purchase Modal */}
+      <PurchaseModal
+        isOpen={isPurchaseModalOpen}
+        onClose={() => setIsPurchaseModalOpen(false)}
+        isPreorderOnly={isPreorderOnly}
+      />
     </section>
   );
 };

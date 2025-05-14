@@ -44,10 +44,15 @@ const PaymentPage: React.FC<PaymentPageProps> = () => {
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
 
-  // Get email from query params or use empty string
+  // Get parameters from query params with fallbacks
   const email = queryParams.get('email') || '';
   const amount = queryParams.get('amount') || '2999';
-  const productName = queryParams.get('product') || 'The Science of Public Relations (Digital Edition)';
+  // Check both 'productName' and 'product' for backward compatibility
+  const productName = queryParams.get('productName') || queryParams.get('product') || 'The Science of Public Relations (Digital Edition)';
+  const quantity = parseInt(queryParams.get('quantity') || '1');
+
+  // Log the parameters for debugging
+  console.log('Payment parameters:', { email, amount, productName, quantity });
 
   const [paymentStatus, setPaymentStatus] = useState<{
     message: string;
@@ -147,7 +152,7 @@ const PaymentPage: React.FC<PaymentPageProps> = () => {
 
         // Redirect to success page after a short delay
         setTimeout(() => {
-          navigate(`/payment-success?reference=${reference}`);
+          navigate(`/payment-success?reference=${reference}&amount=${amount}`);
         }, 1500);
       } else {
         // Payment verification failed
@@ -181,6 +186,22 @@ const PaymentPage: React.FC<PaymentPageProps> = () => {
       if (typeof window.PaystackPop === 'undefined') {
         console.error('PaystackPop is still undefined after loading script');
         throw new Error('Paystack not loaded properly');
+      }
+
+      // Log what we're sending to the server
+      console.log('Initializing payment with:', { email, amount, productName });
+
+      // Validate required fields
+      if (!email) {
+        throw new Error('Email is required for payment');
+      }
+
+      if (!amount) {
+        throw new Error('Amount is required for payment');
+      }
+
+      if (!productName) {
+        throw new Error('Product name is required for payment');
       }
 
       // First, initialize payment on the server to store order in database
@@ -380,6 +401,9 @@ const PaymentPage: React.FC<PaymentPageProps> = () => {
                   try {
                     setIsProcessing(true);
 
+                    // Log what we're sending to the server
+                    console.log('Sending to server:', { email, amount, productName });
+
                     // Initialize payment on the server first
                     const initResponse = await fetch('http://localhost:5000/api/initialize-payment', {
                       method: 'POST',
@@ -387,9 +411,9 @@ const PaymentPage: React.FC<PaymentPageProps> = () => {
                         'Content-Type': 'application/json',
                       },
                       body: JSON.stringify({
-                        email,
-                        amount,
-                        productName
+                        email: email || 'customer@example.com', // Provide a fallback email
+                        amount: amount || '2999',
+                        productName: productName || 'The Science of Public Relations'
                       }),
                     });
 

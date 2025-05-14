@@ -75,7 +75,7 @@ const About = () => {
 
             <p className="text-base sm:text-lg text-gray-600 mb-6 sm:mb-8">
               He's facilitated numerous training sessions, sharing insights with public relations leaders and communication heads from all sectors. He is a member of several professional bodies, including AMEC, the Nigerian Institute of Public Relations (NIPR), the Association of Media and Communication Researchers of Nigeria (AMCRON), the Institute of Strategic Management of Nigeria (ISMN), and the Chartered Institute of Operations Management of Nigeria (CIOM).
-              When he isn't immersed in reports and dashboards, Philip hosts "The Chronicles of a Pensive Soul," a podcast that explores human psychology and the stories behind our decisions. As the author of "THE SCIENCE OF PUBLIC RELATIONS: A Comprehensive Guide for Measurement and Evaluation" — the first of its kind in Africa — Philip continues to champion education and awareness for better PR measurement frameworks, valid metrics, and real accountability in the public relations and communications industry.
+              When he isn't immersed in reports and dashboards, Philip hosts "The Chronicles of a Pensive Soul," a podcast that explores human psychology and the stories behind our decisions. As the author of "THE SCIENCE OF PUBLIC RELATIONS: A Comprehensive Guide to Measurement and Evaluation" — the first of its kind in Africa — Philip continues to champion education and awareness for better PR measurement frameworks, valid metrics, and real accountability in the public relations and communications industry.
             </p>
 
             <Link

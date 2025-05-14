@@ -1,31 +1,32 @@
 import React, { useState, useEffect } from 'react';
 import { ChevronRight, ChevronLeft, BookOpen, Quote, User, Calendar, Award, Check } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
+import PurchaseModal from './PurchaseModal';
 
 // Testimonials/Quotes data
 const testimonials = [
   {
-    quote: "This book revolutionized how I approach PR measurement. A must-read for every communications professional.",
-    author: "Sarah Johnson",
-    title: "Communications Director, TechGlobal",
-    image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&auto=format&fit=crop&w=256&h=256&q=80"
+    quote: "With this book, Philip Odiakose has cemented Africa’s role in the global conversation on PR measurement. He brings a fresh perspective, blending international best practices with the realities of the African media landscape. This is the blueprint we have been waiting for ",
+    author: "John Ehiguese",
+    title: "Founder and CEO of Mediacraft Associates",
+    image: "https://mail.google.com/mail/u/0?ui=2&ik=edfa255ca6&attid=0.12&permmsgid=msg-f:1832050335100915988&th=196cc012ba535114&view=fimg&fur=ip&permmsgid=msg-f:1832050335100915988&sz=s0-l75-ft&attbid=ANGjdJ_zdcp-Tj1JPQXoKePQBLv5AjgU6PhGLs0jtDJ0RrJxy71QGPA4xphIQnXkOcAKZIuxLl9XPp3_G-bAe8-bWE3s9iNMaUe6CwqKGzDHXcA5FIa0Oaild4HF444&disp=emb&realattid=ii_man5cym814&zw"
   },
   {
-    quote: "Philip Odiakose has created the definitive guide to PR measurement in Africa. His insights are invaluable.",
-    author: "Michael Adebayo",
-    title: "CEO, MediaMetrics Africa",
+    quote: "Philip’s work is a brilliant contribution to the global PR measurement space. It combines proven frameworks with fresh, relatable context — a book that transcends borders and speaks to professionals at all levels.",
+    author: "Johna Burke",
+    title: "CEO and Global Managing Director of AMEC (Association for the Measurement and Evaluation of Communication)",
     image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=crop&w=256&h=256&q=80"
   },
   {
-    quote: "The Science of Public Relations bridges the gap between theory and practice in a way I've never seen before.",
-    author: "Dr. Elizabeth Nkomo",
-    title: "Professor of Communications, University of Lagos",
+    quote: "This book is not just about measurement, rather it is about how and why it truly matters. The breakdown and settling of clear Public Relations objectives in Chapter 2, is something every communication professional should stick on their office wall. Philip makes it extremely impossible to hide behind ‘busy work’ Public Relations, as if it cannot be measured, it can never be valued.",
+    author: "Yomi Badejo-Okusanya (YBO)",
+    title: "Lead Partner, CMC Connect LLP (Perception Consulting), a Fellow of NIPR and NIMN, Ex. President, African Public Relations Association (APRA) and Inaugural Chair, Nigeria Public Relations Week.",
     image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-1.2.1&auto=format&fit=crop&w=256&h=256&q=80"
   },
   {
-    quote: "A groundbreaking contribution to the field of PR measurement and evaluation in Africa.",
-    author: "David Ogunlesi",
-    title: "Head of PR, AfriBank Group",
+    quote: "Philip Odiakose delivers a sharp, insightful take on one of PR’s most essential practices: setting and measuring clear objectives. This book offers real value to anyone serious about elevating their impact in communications. Philip draws a critical and often-missed line between goals and objectives, showing why specificity and alignment with business strategy are non-negotiable. His emphasis on balancing hard data with human insights reflects his deep understanding of how modern PR must operate.",
+    author: "Todd Murphy",
+    title: "President at Truescope, U.S., FIBEP President and AMEC Member.",
     image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-1.2.1&auto=format&fit=crop&w=256&h=256&q=80"
   }
 ];
@@ -97,29 +98,20 @@ const BookPage = () => {
     type: 'success' | 'error' | 'info' | null;
   }>({ message: '', type: null });
 
-  // No need for Paystack loading code since we're using a dedicated payment page
+  // State for purchase modal
+  const [isPurchaseModalOpen, setIsPurchaseModalOpen] = useState(false);
+  const [isPreorderOnly, setIsPreorderOnly] = useState(false);
 
   // Function to handle pre-order button click
   const handlePreOrder = () => {
     // Reset payment status
     setPaymentStatus({ message: '', type: null });
 
-    // Validate email
-    if (!preOrderEmail) {
-      setPreOrderEmailError('Please enter your email address');
-      return;
-    }
+    // Set pre-order only mode
+    setIsPreorderOnly(true);
 
-    if (!validateEmail(preOrderEmail)) {
-      setPreOrderEmailError('Please enter a valid email address');
-      return;
-    }
-
-    setPreOrderEmailError('');
-    setIsProcessing(true);
-
-    // Redirect to payment page with email as query parameter
-    navigate(`/payment?email=${encodeURIComponent(preOrderEmail)}&amount=2999&product=${encodeURIComponent('The Science of Public Relations (Digital Edition)')}`);
+    // Open purchase modal
+    setIsPurchaseModalOpen(true);
   };
 
   // Note: Server-side verification is commented out for now
@@ -146,7 +138,7 @@ const BookPage = () => {
                 THE SCIENCE OF <span className="text-yellow-400">PUBLIC RELATIONS</span>
               </h1>
               <p className="text-lg sm:text-xl text-gray-300 mb-4 sm:mb-6 font-medium">
-                A Comprehensive Guide for Measurement and Evaluation
+                A Comprehensive Guide to Measurement and Evaluation
               </p>
               <p className="text-base sm:text-lg text-gray-300 mb-6 sm:mb-8">
                 The first definitive guide to PR measurement and evaluation in Africa,
@@ -156,16 +148,10 @@ const BookPage = () => {
 
               <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-6 justify-center lg:justify-start">
                 <button
-                  onClick={() => window.location.href = "#pre-order"}
+                  onClick={handlePreOrder}
                   className="w-full sm:w-auto bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-3 px-6 sm:px-8 rounded-md shadow-lg transition duration-300 flex items-center justify-center touch-target"
                 >
                   Pre-order Now <ChevronRight className="ml-2 h-5 w-5" />
-                </button>
-                <button
-                  onClick={() => window.location.href = "#chapters"}
-                  className="w-full sm:w-auto bg-transparent hover:bg-white/10 text-white border border-white/30 font-medium py-3 px-6 sm:px-8 rounded-md transition duration-300 flex items-center justify-center touch-target"
-                >
-                  Explore Chapters
                 </button>
               </div>
             </div>
@@ -197,7 +183,7 @@ const BookPage = () => {
 
               <div className="prose prose-lg max-w-none text-gray-600">
                 <p className="mb-4">
-                  "The Science of Public Relations: A Comprehensive Guide for Measurement and Evaluation" came from a simple but persistent question: how do we finally bridge the gap between "good vibes" and "real impact"?
+                  "The Science of Public Relations: A Comprehensive Guide to Measurement and Evaluation" came from a simple but persistent question: how do we finally bridge the gap between "good vibes" and "real impact"?
                 </p>
                 <p className="mb-4">
                   How do we equip public relations and communications professionals with the right tools to not just look good, but prove it — and get better at it?
@@ -316,7 +302,7 @@ const BookPage = () => {
             <h2 className="text-2xl sm:text-3xl font-bold mb-4">Pre-order Your Copy Today</h2>
             <div className="w-24 h-1 bg-yellow-500 mx-auto mb-8"></div>
             <p className="max-w-2xl mx-auto text-blue-100 text-lg">
-              Be among the first to receive "The Science of Public Relations" and get exclusive bonuses
+              Be among the first to receive "The Science of Public Relations" and get exclusive Bonus
             </p>
           </div>
 
@@ -325,11 +311,11 @@ const BookPage = () => {
               <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
                 <div>
                   <h3 className="text-xl font-bold mb-2">Special Pre-order Price</h3>
-                  <p className="text-blue-100 mb-4">Limited time offer with exclusive bonuses</p>
+                  <p className="text-blue-100 mb-4">Limited time offer with exclusive Discount</p>
                   <div className="flex items-baseline">
-                    <span className="text-3xl font-bold">₦2,999</span>
-                    <span className="text-blue-200 line-through ml-2">₦3,999</span>
-                    <span className="bg-yellow-500 text-white text-xs font-bold px-2 py-1 rounded-full ml-2">SAVE 25%</span>
+                    <span className="text-3xl font-bold">₦10,000</span>
+                    <span className="text-blue-200 line-through ml-2">₦13,000</span>
+                    <span className="bg-yellow-500 text-white text-xs font-bold px-2 py-1 rounded-full ml-2">SAVE 20%</span>
                   </div>
                 </div>
               </div>
@@ -361,21 +347,22 @@ const BookPage = () => {
 
               <button
                 onClick={handlePreOrder}
-                disabled={isProcessing}
-                className={`w-full bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-3 px-8 rounded-md shadow-lg transition duration-300 flex items-center justify-center ${
-                  isProcessing ? 'opacity-70 cursor-not-allowed' : ''
-                }`}
+                className="w-full bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-3 px-8 rounded-md shadow-lg transition duration-300 flex items-center justify-center"
               >
-                {isProcessing ? (
-                  <>Processing...</>
-                ) : (
-                  <>Pre-order Now <ChevronRight className="ml-2 h-5 w-5" /></>
-                )}
+                Pre-order Now <ChevronRight className="ml-2 h-5 w-5" />
               </button>
             </div>
           </div>
         </div>
       </section>
+
+      {/* Purchase Modal */}
+      <PurchaseModal
+        isOpen={isPurchaseModalOpen}
+        onClose={() => setIsPurchaseModalOpen(false)}
+        email={preOrderEmail}
+        isPreorderOnly={isPreorderOnly}
+      />
     </div>
   );
 };
