@@ -15,6 +15,7 @@ import PaymentSuccess from './components/PaymentSuccess';
 import Speaking from './components/Speaking';
 import Podcast from './components/Podcast';
 import HomeSummary from './components/HomeSummary';
+import ScrollToTop from './components/ScrollToTop';
 import './index.css';
 
 function App() {
@@ -42,6 +43,7 @@ function App() {
           <Route path="/contact" element={<Contact />} />
         </Routes>
         <Footer />
+        <ScrollToTop />
       </div>
     </Router>
   );

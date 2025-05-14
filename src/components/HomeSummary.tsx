@@ -55,9 +55,9 @@ const HomeSummary = () => {
           <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">
             Discover The Science of Public Relations
           </h2>
-          <p className="max-w-3xl mx-auto text-base sm:text-lg text-gray-600">
+          {/* <p className="max-w-3xl mx-auto text-base sm:text-lg text-gray-600">
             Explore all aspects of PR measurement and evaluation through our comprehensive resources
-          </p>
+          </p> */}
         </div>
 
         {/* About TSoPR Section */}
@@ -70,7 +70,7 @@ const HomeSummary = () => {
             <div className="flex flex-col sm:flex-row gap-4 mb-4">
               <div className="w-full sm:w-1/3">
                 <img
-                  src="/author.jpg"
+                  src="/logo.png"
                   alt="Philip Odiakose - Author"
                   className="w-full h-auto rounded-lg shadow-md"
                 />
