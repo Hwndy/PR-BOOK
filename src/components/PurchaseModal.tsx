@@ -1,18 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { PaymentService } from '../services/PaymentService';
 
 // Book format types and prices
 const BOOK_FORMATS = {
   PAPERBACK: {
     name: 'Paperback',
-    price: 15000, // ₦15,000
+    price: 12000, // ₦12,000 (20% off from ₦15,000)
     isPreorder: false
   },
   EBOOK: {
     name: 'E-Book',
-    price: 10000, // ₦10,000
+    price: 10000, // ₦8,000 (20% off from ₦10,000)
     isPreorder: true
   }
 };
@@ -94,26 +93,6 @@ const PurchaseModal: React.FC<PurchaseModalProps> = ({
 
     // Navigate to payment page
     navigate(`/payment?email=${encodeURIComponent(userEmail)}&amount=${totalPrice}&productName=${encodeURIComponent(productName)}&quantity=${quantity}`);
-  };
-
-  const handlePayment = async (email: string, amount: string, productName: string, quantity: number) => {
-    try {
-      const response = await PaymentService.initializePayment({
-        email,
-        amount,
-        productName,
-        quantity
-      });
-  
-      if (response.data && response.data.authorization_url) {
-        window.location.href = response.data.authorization_url;
-      } else {
-        throw new Error('Invalid payment response');
-      }
-    } catch (error) {
-      console.error('Payment error:', error);
-      alert('Payment initialization failed. Please try again.');
-    }
   };
 
   if (!isOpen) return null;

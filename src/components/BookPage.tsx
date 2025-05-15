@@ -313,8 +313,8 @@ const BookPage = () => {
                   <h3 className="text-xl font-bold mb-2">Special Pre-order Price</h3>
                   <p className="text-blue-100 mb-4">Limited time offer with exclusive Discount</p>
                   <div className="flex items-baseline">
-                    <span className="text-3xl font-bold">₦10,000</span>
-                    <span className="text-blue-200 line-through ml-2">₦13,000</span>
+                    <span className="text-3xl font-bold">₦12,000</span>
+                    <span className="text-blue-200 line-through ml-2">₦15,000</span>
                     <span className="bg-yellow-500 text-white text-xs font-bold px-2 py-1 rounded-full ml-2">SAVE 20%</span>
                   </div>
                 </div>

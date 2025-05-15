@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { PaymentService } from '../services/PaymentService';
 
 const PaymentVerification = () => {
   const [searchParams] = useSearchParams();
@@ -14,22 +13,10 @@ const PaymentVerification = () => {
       return;
     }
 
-    const verifyPayment = async () => {
-      try {
-        const response = await PaymentService.verifyPayment(reference);
-        if (response.data.status === 'success') {
-          setVerificationStatus('success');
-          // Handle successful payment (e.g., send email, update database)
-        } else {
-          setVerificationStatus('failed');
-        }
-      } catch (error) {
-        console.error('Verification error:', error);
-        setVerificationStatus('failed');
-      }
-    };
+    // Removed PaymentService verification logic
+    // You'll need to implement a new verification method here
+    setVerificationStatus('failed');
 
-    verifyPayment();
   }, [searchParams]);
 
   return (
