@@ -34,7 +34,7 @@ const About = () => {
                   <br /><br />
                   Welcome to the future of PR — rooted in truth, driven by data.
                   <br /><br />
-                  <span className="block font-bold mt-2">Philip Odiakose<br />Chief Media Analyst</span>
+                  <span className="block font-bold mt-2">Philip Odiakose</span>
                 </p>
               </div>
             </div>
