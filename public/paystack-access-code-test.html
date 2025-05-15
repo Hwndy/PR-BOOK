@@ -63,10 +63,10 @@
 </head>
 <body>
   <h1>Paystack Access Code Test</h1>
-  
+
   <div>
     <p>This page tests Paystack integration using access codes.</p>
-    
+
     <div>
       <h3>1. Initialize Transaction</h3>
       <form id="initForm">
@@ -87,7 +87,7 @@
       <div id="initStatus" class="status"></div>
       <div id="initResponse" class="code"></div>
     </div>
-    
+
     <div style="margin-top: 30px;">
       <h3>2. Test Direct Checkout</h3>
       <div>
@@ -96,7 +96,7 @@
         <button type="button" id="checkoutButton">Open Checkout Page</button>
       </div>
     </div>
-    
+
     <div style="margin-top: 30px;">
       <h3>3. Verify Transaction</h3>
       <div>
@@ -117,16 +117,16 @@
       const secretKey = document.getElementById('secretKey').value;
       const initStatus = document.getElementById('initStatus');
       const initResponse = document.getElementById('initResponse');
-      
+
       if (!email || !amount || !secretKey) {
         initStatus.textContent = 'Please fill in all fields';
         initStatus.className = 'status error';
         return;
       }
-      
+
       initStatus.textContent = 'Initializing transaction...';
       initStatus.className = 'status info';
-      
+
       try {
         const response = await fetch('https://api.paystack.co/transaction/initialize', {
           method: 'POST',
@@ -143,18 +143,18 @@
             }
           })
         });
-        
+
         const data = await response.json();
-        
+
         if (data.status) {
           initStatus.textContent = 'Transaction initialized successfully!';
           initStatus.className = 'status success';
-          
+
           // Auto-fill the access code field
           if (data.data.access_code) {
             document.getElementById('accessCode').value = data.data.access_code;
           }
-          
+
           // Auto-fill the reference field
           if (data.data.reference) {
             document.getElementById('reference').value = data.data.reference;
@@ -163,7 +163,7 @@
           initStatus.textContent = 'Failed to initialize transaction: ' + data.message;
           initStatus.className = 'status error';
         }
-        
+
         // Display the full response
         initResponse.textContent = JSON.stringify(data, null, 2);
       } catch (error) {
@@ -172,35 +172,35 @@
         initStatus.className = 'status error';
       }
     });
-    
+
     // Open Checkout Page
     document.getElementById('checkoutButton').addEventListener('click', () => {
       const accessCode = document.getElementById('accessCode').value;
-      
+
       if (!accessCode) {
         alert('Please enter an access code');
         return;
       }
-      
+
       window.open(`https://checkout.paystack.com/${accessCode}`, '_blank');
     });
-    
+
     // Verify Transaction
     document.getElementById('verifyButton').addEventListener('click', async () => {
       const reference = document.getElementById('reference').value;
       const secretKey = document.getElementById('secretKey').value;
       const verifyStatus = document.getElementById('verifyStatus');
       const verifyResponse = document.getElementById('verifyResponse');
-      
+
       if (!reference || !secretKey) {
         verifyStatus.textContent = 'Please enter a reference and secret key';
         verifyStatus.className = 'status error';
         return;
       }
-      
+
       verifyStatus.textContent = 'Verifying transaction...';
       verifyStatus.className = 'status info';
-      
+
       try {
         const response = await fetch(`https://api.paystack.co/transaction/verify/${reference}`, {
           method: 'GET',
@@ -208,9 +208,9 @@
             'Authorization': `Bearer ${secretKey}`
           }
         });
-        
+
         const data = await response.json();
-        
+
         if (data.status) {
           verifyStatus.textContent = `Transaction status: ${data.data.status}`;
           verifyStatus.className = 'status success';
@@ -218,7 +218,7 @@
           verifyStatus.textContent = 'Failed to verify transaction: ' + data.message;
           verifyStatus.className = 'status error';
         }
-        
+
         // Display the full response
         verifyResponse.textContent = JSON.stringify(data, null, 2);
       } catch (error) {
