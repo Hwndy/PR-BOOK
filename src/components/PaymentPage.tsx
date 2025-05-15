@@ -132,7 +132,7 @@ const PaymentPage: React.FC<PaymentPageProps> = () => {
   // Function to verify payment with the server
   const verifyPayment = useCallback(async (reference: string) => {
     try {
-      const response = await fetch('http://localhost:5000/api/verify-payment', {
+      const response = await fetch('https://pr-book.onrender.com/api/verify-payment', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -205,7 +205,7 @@ const PaymentPage: React.FC<PaymentPageProps> = () => {
       }
 
       // First, initialize payment on the server to store order in database
-      const initResponse = await fetch('http://localhost:5000/api/initialize-payment', {
+      const initResponse = await fetch('https://pr-book.onrender.com/api/initialize-payment', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -405,7 +405,7 @@ const PaymentPage: React.FC<PaymentPageProps> = () => {
                     console.log('Sending to server:', { email, amount, productName });
 
                     // Initialize payment on the server first
-                    const initResponse = await fetch('http://localhost:5000/api/initialize-payment', {
+                    const initResponse = await fetch('https://pr-book.onrender.com/api/initialize-payment', {
                       method: 'POST',
                       headers: {
                         'Content-Type': 'application/json',
