@@ -15,20 +15,20 @@ const Book = () => {
   };
 
   return (
-    <section className="py-16 sm:py-20 md:py-24 bg-white">
-      <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-10">
-        <div className="flex flex-col lg:flex-row items-center gap-12 sm:gap-16">
-          <div className="w-full lg:w-1/2 mb-8 lg:mb-0">
+    <section className="py-12 sm:py-16 md:py-24 bg-white">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex flex-col lg:flex-row items-center gap-8 sm:gap-12 lg:gap-16">
+          <div className="w-full lg:w-1/2 mb-6 lg:mb-0">
             <img
               src="/book cover.jpg"
               alt="THESCIENCEOFPUBLICRELATIONS Logo"
-              className="rounded-lg shadow-2xl w-full max-w-md mx-auto lg:max-w-none"
+              className="rounded-lg shadow-2xl w-full max-w-sm mx-auto lg:max-w-none"
               loading="eager"
             />
           </div>
 
           <div className="w-full lg:w-1/2">
-            <h2 className="text-2xl sm:text-3xl font-bold font-futura text-gray-900 mb-6 sm:mb-8 tracking-tight">
+            <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold font-futura text-gray-900 mb-4 sm:mb-6 tracking-tight">
               THE SCIENCE OF PUBLIC RELATIONS
             </h2>
             <p className="text-base sm:text-lg text-gray-600 mb-6 sm:mb-8 leading-relaxed">

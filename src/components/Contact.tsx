@@ -56,8 +56,8 @@ const Contact = () => {
                 <div className="flex items-start">
                   <Phone className="h-5 w-5 sm:h-6 sm:w-6 text-blue-300 mt-1 flex-shrink-0" />
                   <div className="ml-3 sm:ml-4">
-                    <p className="text-white font-medium text-sm sm:text-base">Call Us</p>
-                    <p className="text-blue-100 text-sm sm:text-base">+1 (234) 567-8901</p>
+                    <p className="text-white font-medium text-sm sm:text-base">WhatsApp</p>
+                    <p className="text-blue-100 text-sm sm:text-base">+234 817 083 9758</p>
                   </div>
                 </div>
 
@@ -65,7 +65,7 @@ const Contact = () => {
                   <Mail className="h-5 w-5 sm:h-6 sm:w-6 text-blue-300 mt-1 flex-shrink-0" />
                   <div className="ml-3 sm:ml-4">
                     <p className="text-white font-medium text-sm sm:text-base">Email Us</p>
-                    <p className="text-blue-100 text-sm sm:text-base break-words">info@philipodiakose.com</p>
+                    <p className="text-blue-100 text-sm sm:text-base break-words">thescienceofpublicrelations@gmail.com</p>
                   </div>
                 </div>
 
@@ -74,8 +74,8 @@ const Contact = () => {
                   <div className="ml-3 sm:ml-4">
                     <p className="text-white font-medium text-sm sm:text-base">Visit Us</p>
                     <p className="text-blue-100 text-sm sm:text-base">
-                      123 PR Analytics Street<br />
-                      New York, NY 10001
+                      OLUFEMI STREET<br />
+                      SURULERE, LAGOS
                     </p>
                   </div>
                 </div>

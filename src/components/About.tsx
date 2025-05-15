@@ -20,23 +20,23 @@ const About = () => {
                 />
               </div>
               <div className="w-full sm:w-2/3 space-y-8">
-                <p className="text-base text-justify font-futura leading-relaxed tracking-wide">
+                <p className="text-base  font-futura leading-relaxed tracking-wide">
                   TheScienceOfPublicRelations.com is more than just a book title it is a movement, a mindset, and a resource hub for the future of public relations.
                   For too long, the PR and communications industry has leaned on creativity, instinct, and storytelling. But today's landscape demands more it demands proof.
                   Organizations are asking the hard questions: "So what?" and "Show me the impact." That is where we come in.
                 </p>
                 
-                <p className="text-base text-justify font-futura leading-relaxed tracking-wide">
+                <p className="text-base  font-futura leading-relaxed tracking-wide">
                   This platform is built to bridge the gap between good vibes and real results. Here, we dive deep into the science behind public relations not just through the book,
                   but through curated learnings, evolving trends, methodologies, real-world case studies, podcasts, and insights on PR performance audits, media intelligence, and measurement frameworks that matter.
                 </p>
 
-                <p className="text-base text-justify font-futura leading-relaxed tracking-wide">
+                <p className="text-base font-futura leading-relaxed tracking-wide">
                   Whether you are a student beginning your journey, a PR executive growing your expertise, or a seasoned professional this is your space to explore and elevate your practice.
                   Authored by Philip Odiakose, a leading voice in PR measurement and evaluation.
                 </p>
 
-                <p className="text-base text-justify font-futura leading-relaxed tracking-wide">
+                <p className="text-base font-futura leading-relaxed tracking-wide">
                   Welcome to the future of PR rooted in truth, driven by data.
                 </p>
 
