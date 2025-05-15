@@ -1,5 +1,5 @@
 const API_URL = process.env.NODE_ENV === 'production' 
-  ? 'https://thescienceofpublicrelations.vercel.app/api'
+  ? 'https://pr-book.onrender.com/api'
   : 'http://localhost:5001/api';
 
 export const PaymentService = {
@@ -25,6 +25,21 @@ export const PaymentService = {
       return await response.json();
     } catch (error) {
       console.error('Payment initialization error:', error);
+      throw error;
+    }
+  },
+
+  verifyPayment: async (reference: string) => {
+    try {
+      const response = await fetch(`${API_URL}/verify-payment/${reference}`);
+      
+      if (!response.ok) {
+        throw new Error('Payment verification failed');
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Verification error:', error);
       throw error;
     }
   }
