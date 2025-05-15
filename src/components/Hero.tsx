@@ -12,37 +12,37 @@ const Hero = () => {
     setIsPurchaseModalOpen(true);
   };
   return (
-    <section id="home" className="pt-24 pb-12 md:pt-32 md:pb-20 bg-gradient-to-br from-gray-900 to-blue-900 text-white overflow-hidden">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col md:flex-row items-start justify-between gap-8">
+    <section id="home" className="pt-28 pb-16 md:pt-36 md:pb-24 bg-gradient-to-br from-gray-900 to-blue-900 text-white overflow-hidden">
+      <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-10">
+        <div className="flex flex-col md:flex-row items-start justify-between gap-12">
           <div className="w-full md:w-1/2 mb-12 md:mb-0">
-            <span className="inline-block px-4 py-2 rounded-full bg-yellow-500/20 text-yellow-400 text-sm font-bold font-futura mb-4 sm:mb-6">
+            <span className="inline-block px-5 py-2.5 rounded-full bg-yellow-500/20 text-yellow-400 text-sm font-bold font-futura mb-6 sm:mb-8">
               #1 Best-Selling Author
             </span>
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold font-futura leading-tight mb-6 sm:mb-8">
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold font-futura leading-tight tracking-tight mb-8 sm:mb-10">
               The Science of <span className="text-yellow-400">Public Relations</span>
             </h1>
             <div className="max-w-lg">
-              <h2 className="text-xl sm:text-2xl font-bold font-futura text-yellow-400 mb-4">
+              <h2 className="text-2xl sm:text-3xl font-bold font-futura text-yellow-400 mb-6 sm:mb-8 tracking-tight">
                 A Comprehensive Guide to Measurement and Evaluation
               </h2>
               <div className="space-y-4 text-gray-300">
-                <p className="text-base sm:text-lg font-bold font-futura leading-relaxed text-justify">
+                <p className="text-base sm:text-lg  font-futura leading-relaxed text-justify">
                   How do we finally bridge the gap between "good vibes" and "real impact"? This question has driven the creation of this comprehensive guide.
                 </p>
-                <p className="text-base sm:text-lg font-bold font-futura leading-relaxed text-justify">
-                  Today's PR professionals need more than just creativity—they need proven tools to demonstrate value and drive results. This book equips you with the frameworks and methodologies to not just look good, but prove it and continuously improve.
+                <p className="text-base sm:text-lg  font-futura leading-relaxed text-justify">
+                  Today's PR professionals need more than just creativity they need proven tools to demonstrate value and drive results. This book equips you with the frameworks and methodologies to not just look good, but prove it and continuously improve.
                 </p>
-                <p className="text-base sm:text-lg font-bold font-futura leading-relaxed text-justify">
+                <p className="text-base sm:text-lg  font-futura leading-relaxed text-justify">
                   Join me on this journey as we rethink success metrics and embrace an evidence-driven approach to public relations and communications.
                 </p>
-                <p className="text-base sm:text-lg font-bold font-futura text-yellow-400">
+                <p className="text-base sm:text-lg  font-futura text-yellow-400">
                   Welcome to the future of PR measurement and evaluation.
                 </p>
               </div>
             </div>
 
-            <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-6 mt-2">
+            <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-6 mt-4 sm:mt-6">
               <button
                 onClick={handlePreOrder}
                 className="w-full sm:w-auto bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-3 px-6 sm:px-8 rounded-md shadow-lg transition duration-300 flex items-center justify-center touch-target"

@@ -15,9 +15,9 @@ const Book = () => {
   };
 
   return (
-    <section className="py-12 sm:py-16 md:py-20 bg-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col lg:flex-row items-center gap-8 sm:gap-12">
+    <section className="py-16 sm:py-20 md:py-24 bg-white">
+      <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-10">
+        <div className="flex flex-col lg:flex-row items-center gap-12 sm:gap-16">
           <div className="w-full lg:w-1/2 mb-8 lg:mb-0">
             <img
               src="/book cover.jpg"
@@ -28,10 +28,10 @@ const Book = () => {
           </div>
 
           <div className="w-full lg:w-1/2">
-            <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">
+            <h2 className="text-2xl sm:text-3xl font-bold font-futura text-gray-900 mb-6 sm:mb-8 tracking-tight">
               THE SCIENCE OF PUBLIC RELATIONS
             </h2>
-            <p className="text-base sm:text-lg text-gray-600 mb-4 sm:mb-6">
+            <p className="text-base sm:text-lg text-gray-600 mb-6 sm:mb-8 leading-relaxed">
               Transform your PR strategy with data-driven insights and proven methodologies. Learn how to measure, analyze, and optimize your PR campaigns for maximum impact.
             </p>
 
