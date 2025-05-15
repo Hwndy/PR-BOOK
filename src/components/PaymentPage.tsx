@@ -39,6 +39,8 @@ declare global {
   }
 }
 
+const PAYSTACK_PUBLIC_KEY = import.meta.env.VITE_PAYSTACK_PUBLIC_KEY;
+
 const PaymentPage: React.FC<PaymentPageProps> = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -251,7 +253,7 @@ const PaymentPage: React.FC<PaymentPageProps> = () => {
         console.log('PaystackPop instance created successfully');
 
         paystack.newTransaction({
-          key: 'pk_test_e78a4212fea05f0b8718311dcee69a1bcf881dd3',
+          key: 'pk_live_c156f6c0c33f1c8c7b2f9f3f8f9f0f0f0f0f0f0f', // Replace with your actual Paystack public key
           email: email,
           amount: parseInt(amount) * 100, // Convert to kobo
           currency: 'NGN',
@@ -290,11 +292,11 @@ const PaymentPage: React.FC<PaymentPageProps> = () => {
       }
     } catch (error) {
       console.error('Payment error:', error);
-      setIsProcessing(false);
       setPaymentStatus({
-        message: 'Payment service is currently unavailable. Please try again later.',
+        message: error instanceof Error ? error.message : 'Payment initialization failed',
         type: 'error'
       });
+      setIsProcessing(false);
     }
   }, [email, amount, productName, verifyPayment, loadPaystackScript]);
 
@@ -444,14 +446,13 @@ const PaymentPage: React.FC<PaymentPageProps> = () => {
 
                       const paystack = new window.PaystackPop();
                       paystack.newTransaction({
-                        key: 'pk_test_e78a4212fea05f0b8718311dcee69a1bcf881dd3',
+                        key: PAYSTACK_PUBLIC_KEY,
                         email,
                         amount: parseInt(amount) * 100,
                         currency: 'NGN',
-                        reference: initData.data.reference,
                         metadata: {
                           product_name: productName,
-                          is_preorder: true
+                          quantity: quantity
                         },
                         callback: function(response: PaystackResponse) {
                           console.log('Payment complete! Reference:', response.reference);
