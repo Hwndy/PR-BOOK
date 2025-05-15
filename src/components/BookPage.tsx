@@ -1,33 +1,33 @@
 import React, { useState, useEffect } from 'react';
-import { ChevronRight, ChevronLeft, BookOpen, Quote, User, Calendar, Award, Check } from 'lucide-react';
+import { ChevronRight, ChevronLeft, BookOpen, Quote, User, Calendar, Award, Check, CheckCircle, Users, Trophy, Globe } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import PurchaseModal from './PurchaseModal';
 
 // Testimonials/Quotes data
 const testimonials = [
   {
-    quote: "With this book, Philip Odiakose has cemented Africa’s role in the global conversation on PR measurement. He brings a fresh perspective, blending international best practices with the realities of the African media landscape. This is the blueprint we have been waiting for ",
+    quote: "With this book, Philip Odiakose has cemented Africa's role in the global conversation on PR measurement. He brings a fresh perspective, blending international best practices with the realities of the African media landscape. This is the blueprint we have been waiting for ",
     author: "John Ehiguese",
     title: "Founder and CEO of Mediacraft Associates",
-    image: "https://mail.google.com/mail/u/0?ui=2&ik=edfa255ca6&attid=0.12&permmsgid=msg-f:1832050335100915988&th=196cc012ba535114&view=fimg&fur=ip&permmsgid=msg-f:1832050335100915988&sz=s0-l75-ft&attbid=ANGjdJ_zdcp-Tj1JPQXoKePQBLv5AjgU6PhGLs0jtDJ0RrJxy71QGPA4xphIQnXkOcAKZIuxLl9XPp3_G-bAe8-bWE3s9iNMaUe6CwqKGzDHXcA5FIa0Oaild4HF444&disp=emb&realattid=ii_man5cym814&zw"
+    image: "/testimonials/john.jpg"
   },
   {
-    quote: "Philip’s work is a brilliant contribution to the global PR measurement space. It combines proven frameworks with fresh, relatable context — a book that transcends borders and speaks to professionals at all levels.",
+    quote: "Philip's work is a brilliant contribution to the global PR measurement space. It combines proven frameworks with fresh, relatable context — a book that transcends borders and speaks to professionals at all levels.",
     author: "Johna Burke",
     title: "CEO and Global Managing Director of AMEC (Association for the Measurement and Evaluation of Communication)",
-    image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=crop&w=256&h=256&q=80"
+    image: "/testimonials/johna-burke.jpg"
   },
   {
-    quote: "This book is not just about measurement, rather it is about how and why it truly matters. The breakdown and settling of clear Public Relations objectives in Chapter 2, is something every communication professional should stick on their office wall. Philip makes it extremely impossible to hide behind ‘busy work’ Public Relations, as if it cannot be measured, it can never be valued.",
+    quote: "This book is not just about measurement, rather it is about how and why it truly matters. The breakdown and settling of clear Public Relations objectives in Chapter 2, is something every communication professional should stick on their office wall. Philip makes it extremely impossible to hide behind 'busy work' Public Relations, as if it cannot be measured, it can never be valued.",
     author: "Yomi Badejo-Okusanya (YBO)",
     title: "Lead Partner, CMC Connect LLP (Perception Consulting), a Fellow of NIPR and NIMN, Ex. President, African Public Relations Association (APRA) and Inaugural Chair, Nigeria Public Relations Week.",
-    image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-1.2.1&auto=format&fit=crop&w=256&h=256&q=80"
+    image: "/testimonials/yomi-badejo.jpg"
   },
   {
-    quote: "Philip Odiakose delivers a sharp, insightful take on one of PR’s most essential practices: setting and measuring clear objectives. This book offers real value to anyone serious about elevating their impact in communications. Philip draws a critical and often-missed line between goals and objectives, showing why specificity and alignment with business strategy are non-negotiable. His emphasis on balancing hard data with human insights reflects his deep understanding of how modern PR must operate.",
+    quote: "Philip Odiakose delivers a sharp, insightful take on one of PR's most essential practices: setting and measuring clear objectives. This book offers real value to anyone serious about elevating their impact in communications. Philip draws a critical and often-missed line between goals and objectives, showing why specificity and alignment with business strategy are non-negotiable. His emphasis on balancing hard data with human insights reflects his deep understanding of how modern PR must operate.",
     author: "Todd Murphy",
     title: "President at Truescope, U.S., FIBEP President and AMEC Member.",
-    image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-1.2.1&auto=format&fit=crop&w=256&h=256&q=80"
+    image: "/testimonials/todd-murphy.jpg"
   }
 ];
 
@@ -351,6 +351,72 @@ const BookPage = () => {
               >
                 Pre-order Now <ChevronRight className="ml-2 h-5 w-5" />
               </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Author Bio Section */}
+      <section className="py-12 sm:py-16 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-10">
+            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">About the Author</h2>
+            <div className="w-24 h-1 bg-yellow-500 mx-auto mb-8"></div>
+          </div>
+
+          <div className="flex flex-col lg:flex-row items-start gap-8 sm:gap-12">
+            <div className="w-full lg:w-1/3">
+              <div className="relative">
+                <div className="absolute -top-4 -left-4 sm:-top-6 sm:-left-6 w-16 h-16 sm:w-24 sm:h-24 bg-blue-100 rounded-lg"></div>
+                <div className="absolute -bottom-4 -right-4 sm:-bottom-6 sm:-right-6 w-16 h-16 sm:w-24 sm:h-24 bg-blue-100 rounded-lg"></div>
+                <div className="relative z-10 overflow-hidden rounded-lg shadow-xl">
+                  <img
+                    src="/author.jpg"
+                    alt="Philip Odiakose - Author"
+                    className="w-full h-auto"
+                    loading="eager"
+                  />
+                </div>
+              </div>
+
+              <div className="mt-8 grid grid-cols-2 gap-3">
+                <div className="bg-white p-3 rounded-lg shadow-md">
+                  <Users className="h-6 w-6 text-blue-600 mb-1" />
+                  <p className="text-sm text-gray-600">AMEC Member</p>
+                </div>
+                <div className="bg-white p-3 rounded-lg shadow-md">
+                  <Trophy className="h-6 w-6 text-blue-600 mb-1" />
+                  <p className="text-sm text-gray-600">NIPR Member</p>
+                </div>
+                <div className="bg-white p-3 rounded-lg shadow-md">
+                  <Globe className="h-6 w-6 text-blue-600 mb-1" />
+                  <p className="text-sm text-gray-600">AMCRON Member</p>
+                </div>
+                <div className="bg-white p-3 rounded-lg shadow-md">
+                  <CheckCircle className="h-6 w-6 text-blue-600 mb-1" />
+                  <p className="text-sm text-gray-600">ISMN Member</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="w-full lg:w-2/3">
+              <div className="prose prose-lg max-w-none">
+                <p className="text-gray-600 mb-6">
+                  Philip Odiakose is the Founder and Chief Media Analyst at P+ Measurement Services, Nigeria's first independent public relations measurement, evaluation, and performance audit consultancy. With over 15 years of experience in media monitoring, media intelligence, evaluation, reputation analysis, and C-suite reputation evaluation, Philip has built a name as one of Africa's most passionate and forward-thinking voices in PR measurement.
+                </p>
+
+                <p className="text-gray-600 mb-6">
+                  At P+, he leads a team that helps brands across Africa, by setting the short and long-term strategic direction for brands' media monitoring, measurement, and media performance audit. From fintech to financial services, healthcare, insurance, pension management, asset management, power distribution and generation, technology, FMCGs, real estate, telecoms/IT, tobacco, ride-hailing, government agencies, Civil Society Organisations and NGOs, Philip and his team have worked with organizations in nearly every sector.
+                </p>
+
+                <p className="text-gray-600 mb-6">
+                  He is a proud alumnus of the University of Benin and holds certifications in Public Relations Evaluation and Improvement Techniques from the Metropolitan School of Business and Management, UK, as well as in Marketing and Communication from the International Business Management Institute, Berlin, Germany. Philip is a Founding Member of the AMEC Initiative Lab, a Judge for the AMEC Global Awards, and has been honored with several industry recognitions including nominations at LAPRIGA and multiple PR Industry awards.
+                </p>
+
+                <p className="text-gray-600">
+                  When he isn't immersed in reports and dashboards, Philip hosts "The Chronicles of a Pensive Soul," a podcast that explores human psychology and the stories behind our decisions. As the author of "THE SCIENCE OF PUBLIC RELATIONS: A Comprehensive Guide to Measurement and Evaluation" — the first of its kind in Africa — Philip continues to champion education and awareness for better PR measurement frameworks, valid metrics, and real accountability in the public relations and communications industry.
+                </p>
+              </div>
             </div>
           </div>
         </div>

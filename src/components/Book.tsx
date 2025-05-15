@@ -36,14 +36,15 @@ const Book = () => {
             </p>
 
             <div className="bg-gray-50 rounded-lg p-4 sm:p-6 mb-6 sm:mb-8">
-              <h3 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4">What You'll Learn</h3>
+              <h3 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4">Here is what you will find inside</h3>
               <ul className="space-y-2 sm:space-y-3">
                 {[
-                  'Advanced PR measurement frameworks',
-                  'Data-driven decision making',
-                  'ROI calculation methods',
-                  'Performance optimization strategies',
-                  'Industry best practices'
+                  
+                  'Clear, jargon-free guidance on modern PR measurement',
+                  'Globally aligned tools and models (yes, AMEC fans — this one’s for you)',
+                  'How to report & present PR metrics that matter',
+                  'Real-life case studies from African markets to global brands, drawn from years in PR monitoring, measurement, intelligence, and performance audits',
+                  'A step-by-step guide to move from tactical executor to strategic communicator in the boardroom'
                 ].map((item, index) => (
                   <li key={index} className="flex items-center">
                     <Check className="h-4 w-4 sm:h-5 sm:w-5 text-green-500 mr-2 flex-shrink-0" />
