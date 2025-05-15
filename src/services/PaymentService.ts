@@ -1,4 +1,6 @@
-const API_BASE_URL = 'http://localhost:5001/api';
+const API_URL = process.env.NODE_ENV === 'production' 
+  ? 'https://thescienceofpublicrelations.vercel.app/api'
+  : 'http://localhost:5001/api';
 
 export const PaymentService = {
   initializePayment: async (paymentData: {
@@ -8,7 +10,7 @@ export const PaymentService = {
     quantity: number;
   }) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/initialize-payment`, {
+      const response = await fetch(`${API_URL}/initialize-payment`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -20,26 +22,9 @@ export const PaymentService = {
         throw new Error('Payment initialization failed');
       }
 
-      const data = await response.json();
-      return data;
+      return await response.json();
     } catch (error) {
-      console.error('Payment error:', error);
-      throw error;
-    }
-  },
-
-  verifyPayment: async (reference: string) => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/verify-payment/${reference}`);
-      
-      if (!response.ok) {
-        throw new Error('Payment verification failed');
-      }
-
-      const data = await response.json();
-      return data;
-    } catch (error) {
-      console.error('Verification error:', error);
+      console.error('Payment initialization error:', error);
       throw error;
     }
   }
