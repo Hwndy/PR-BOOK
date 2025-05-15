@@ -619,14 +619,15 @@ app.get('/api/order/:reference', async (req, res) => {
 
 // Payment success callback handler
 app.get('/payment-success', (req, res) => {
-  // Get the reference, trxref, and amount from the query parameters
   const { reference, trxref, amount } = req.query;
 
   console.log('Payment callback received:', { reference, trxref, amount });
 
-  // Redirect to the client-side payment success page with all parameters
-  // The Vite development server is running on port 5173
-  const redirectUrl = new URL('http://localhost:5173/payment-success');
+  // Use the actual frontend URL from environment variable or fallback to the Vercel URL
+  const frontendUrl = process.env.FRONTEND_URL || 'https://thescienceofpublicrelations.vercel.app';
+  const redirectUrl = new URL(`${frontendUrl}/payment-success`);
+  
+  // Add reference parameter (use trxref as fallback)
   redirectUrl.searchParams.append('reference', reference || trxref);
 
   // Include amount if available
@@ -634,6 +635,7 @@ app.get('/payment-success', (req, res) => {
     redirectUrl.searchParams.append('amount', amount);
   }
 
+  console.log('Redirecting to:', redirectUrl.toString());
   res.redirect(redirectUrl.toString());
 });
 
@@ -641,5 +643,3 @@ app.get('/payment-success', (req, res) => {
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
-
-// Remove everything below this line
