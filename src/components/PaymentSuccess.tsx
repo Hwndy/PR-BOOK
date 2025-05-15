@@ -45,7 +45,7 @@ const PaymentSuccess = () => {
 
         try {
           // Include amount in the API call
-          const apiUrl = new URL(`http://localhost:5000/api/order/${reference}`);
+          const apiUrl = new URL(`https://pr-book.onrender.com/api/order/${reference}`);
           apiUrl.searchParams.append('amount', amount);
 
           console.log('Fetching order details from:', apiUrl.toString());

@@ -1,6 +1,6 @@
 const API_URL = process.env.NODE_ENV === 'production' 
   ? 'https://pr-book.onrender.com/api'
-  : 'http://localhost:5001/api';
+  // : 'http://localhost:5001/api';
 
 export const PaymentService = {
   initializePayment: async (paymentData: {
