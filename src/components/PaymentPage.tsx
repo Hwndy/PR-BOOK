@@ -253,7 +253,7 @@ const PaymentPage: React.FC<PaymentPageProps> = () => {
         console.log('PaystackPop instance created successfully');
 
         paystack.newTransaction({
-          key: 'pk_live_c156f6c0c33f1c8c7b2f9f3f8f9f0f0f0f0f0f0f', // Replace with your actual Paystack public key
+          key: 'pk_live_2f49e5fc90b7dc3fb5465f8a684bf4e0b0405608', // Replace with your actual Paystack public key
           email: email,
           amount: parseInt(amount) * 100, // Convert to kobo
           currency: 'NGN',

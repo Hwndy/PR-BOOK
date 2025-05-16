@@ -19,7 +19,7 @@ app.use(cors());
 app.use(bodyParser.json());
 
 // Paystack secret key from environment variables
-const PAYSTACK_SECRET_KEY = process.env.PAYSTACK_SECRET_KEY || 'sk_live_76ee5f6ff94cb3419020dbbe379314222ae26348';
+const PAYSTACK_SECRET_KEY = process.env.PAYSTACK_SECRET_KEY || 'sk_live_0342e2f7f4cd019d29a99b60b18b68d40955d9a0';
 
 // Connect to MongoDB
 let isMongoConnected = false;
