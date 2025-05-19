@@ -18,7 +18,8 @@ import HomeSummary from './components/HomeSummary';
 import ScrollToTop from './components/ScrollToTop';
 import './index.css';
 
-function App() {
+// Fix: Use a consistent function declaration style and export
+const App = () => {
   return (
     <Router>
       <div className="min-h-screen">
@@ -47,6 +48,6 @@ function App() {
       </div>
     </Router>
   );
-}
+};
 
 export default App;

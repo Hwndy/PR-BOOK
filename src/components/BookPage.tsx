@@ -9,25 +9,43 @@ const testimonials = [
     quote: "With this book, Philip Odiakose has cemented Africa's role in the global conversation on PR measurement. He brings a fresh perspective, blending international best practices with the realities of the African media landscape. This is the blueprint we have been waiting for ",
     author: "John Ehiguese",
     title: "Founder and CEO of Mediacraft Associates",
-    image: "/testimonials/john.jpg"
+    image: "/testimonials/john.png"
   },
   {
     quote: "Philip's work is a brilliant contribution to the global PR measurement space. It combines proven frameworks with fresh, relatable context — a book that transcends borders and speaks to professionals at all levels.",
     author: "Johna Burke",
     title: "CEO and Global Managing Director of AMEC (Association for the Measurement and Evaluation of Communication)",
-    image: "/testimonials/johna-burke.jpg"
+    image: "/testimonials/johna.png"
   },
   {
     quote: "This book is not just about measurement, rather it is about how and why it truly matters. The breakdown and settling of clear Public Relations objectives in Chapter 2, is something every communication professional should stick on their office wall. Philip makes it extremely impossible to hide behind 'busy work' Public Relations, as if it cannot be measured, it can never be valued.",
     author: "Yomi Badejo-Okusanya (YBO)",
     title: "Lead Partner, CMC Connect LLP (Perception Consulting), a Fellow of NIPR and NIMN, Ex. President, African Public Relations Association (APRA) and Inaugural Chair, Nigeria Public Relations Week.",
-    image: "/testimonials/yomi-badejo.jpg"
+    image: "/testimonials/yomi.png"
   },
   {
     quote: "Philip Odiakose delivers a sharp, insightful take on one of PR's most essential practices: setting and measuring clear objectives. This book offers real value to anyone serious about elevating their impact in communications. Philip draws a critical and often-missed line between goals and objectives, showing why specificity and alignment with business strategy are non-negotiable. His emphasis on balancing hard data with human insights reflects his deep understanding of how modern PR must operate.",
     author: "Todd Murphy",
     title: "President at Truescope, U.S., FIBEP President and AMEC Member.",
-    image: "/testimonials/todd-murphy.jpg"
+    image: "/testimonials/todd.png"
+  },
+  {
+    quote: "At last, we have a comprehensive handbook for measurement and evaluation in Public Relations. The author, Philip Odiakose, has not only provided a valuable resource but helped to elucidate the complexities of M&E in PR and has simplified the global processes for practitioners who once regarded it as intimidating. Today’s realities in PR expect that every practitioner of PR must speak the “Boardroom language” which means backing claims with data that impacts the business's bottom line, known as Return on Investment (ROI). Every PR professional needs this book to ensure their voice counts and is heard effectively.",
+    author: "Nkechi Ali-Balogun",
+    title: " Ph.D., FNIPR, Principal Consultant/CEO at NECCI Consulting",
+    image: "/testimonials/Nkechi.png"
+  },
+  {
+    quote: "Philip doesn’t just talk about PR measurement—he lives it! His insights on the ethics of evaluation in Chapter 1 and busting PR measurement myths in Chapter 8 should be a wake-up call for professionals still relying on outdated metrics like AVEs. This book will save the industry from itself ",
+    author: "Francois van Dyk",
+    title: "AMEC Chair of Middle East and Africa and Head of Operations, Ornico, South Africa.",
+    image: "/testimonials/francois.png"
+  },
+  {
+    quote: "In a world where output is often confused with outcome, this book offers a valuable guide for measuring the effectiveness of public relations efforts. This insightful book presents a comprehensive framework for analyzing PR initiatives, using world-class case studies to illustrate best practices. Philip equips PR professionals with essential skills to demonstrate real value, transforming data into actionable insights that shape strategy and drive impact. Whether you are a seasoned expert or new to the field, this book serves as a roadmap to mastering PR measurement and showcasing success in an ever-evolving landscape. A must-read for anyone serious about proving and improving PR effectiveness.",
+    author: "Dr. Nkiru Olumide-Ojo",
+    title: "Corporate Executive, Long time PR Practitioner.",
+    image: "/testimonials/nkiru.png"
   }
 ];
 
@@ -55,6 +73,11 @@ const bookChapters = [
   },
   {
     number: "05",
+    title: "The African PR Measurement Landscape",
+    description: "Understanding the unique challenges and opportunities for PR measurement in African markets."
+  },
+  {
+    number: "06",
     title: "The African PR Measurement Landscape",
     description: "Understanding the unique challenges and opportunities for PR measurement in African markets."
   }
@@ -228,7 +251,7 @@ const BookPage = () => {
       <section className="py-12 sm:py-16 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-10">
-            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">What Readers Say</h2>
+            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">BOOK PRAISE</h2>
             <div className="w-24 h-1 bg-yellow-500 mx-auto mb-8"></div>
           </div>
 
@@ -237,7 +260,7 @@ const BookPage = () => {
               <div className="p-8 sm:p-10">
                 <Quote className="h-12 w-12 text-blue-100 mb-6" />
 
-                <div className="relative h-48 overflow-hidden">
+                <div className="relative h-64 overflow-y-auto">
                   {testimonials.map((testimonial, index) => (
                     <div
                       key={index}
@@ -245,28 +268,28 @@ const BookPage = () => {
                         index === currentTestimonial ? 'opacity-100' : 'opacity-0 pointer-events-none'
                       }`}
                     >
-                      <p className="text-xl text-gray-700 italic mb-6">"{testimonial.quote}"</p>
+                      <p className="text-sm text-gray-700 italic mb-6 line-clamp-6">"{testimonial.quote}"</p>
                       <div className="flex items-center">
                         <img
                           src={testimonial.image}
                           alt={testimonial.author}
-                          className="w-12 h-12 rounded-full mr-4 object-cover"
+                          className="w-10 h-10 rounded-full mr-3 object-cover"
                         />
                         <div>
-                          <h4 className="font-bold text-gray-900">{testimonial.author}</h4>
-                          <p className="text-gray-600">{testimonial.title}</p>
+                          <h4 className="font-bold text-gray-900 text-xs">{testimonial.author}</h4>
+                          <p className="text-gray-600 text-xs line-clamp-2">{testimonial.title}</p>
                         </div>
                       </div>
                     </div>
                   ))}
                 </div>
 
-                <div className="flex justify-center mt-8 space-x-2">
+                <div className="flex justify-center mt-6 space-x-2">
                   {testimonials.map((_, index) => (
                     <button
                       key={index}
                       onClick={() => setCurrentTestimonial(index)}
-                      className={`w-3 h-3 rounded-full transition-colors duration-300 ${
+                      className={`w-2 h-2 rounded-full transition-colors duration-300 ${
                         index === currentTestimonial ? 'bg-blue-600' : 'bg-gray-300'
                       }`}
                       aria-label={`Go to testimonial ${index + 1}`}
@@ -294,7 +317,6 @@ const BookPage = () => {
           </div>
         </div>
       </section>
-
       {/* Pre-order Section */}
       <section id="pre-order" className="py-12 sm:py-16 bg-gradient-to-br from-blue-900 to-blue-700 text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
