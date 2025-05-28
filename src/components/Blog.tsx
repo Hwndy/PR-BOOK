@@ -34,7 +34,7 @@ const Blog = () => {
             PR Measurement Insights
           </h2>
           <p className="max-w-2xl mx-auto text-lg text-gray-600">
-            Latest trends, methodologies, and best practices in PR measurement and evaluation
+            Latest trends, methodologies, case studies and best practices in PR monitoring, measurement and evaluation
           </p>
         </div>
         

@@ -73,7 +73,7 @@ const PaymentSuccess = () => {
             </div>
             <h1 className="text-2xl font-bold text-gray-900 mb-2">Payment Successful!</h1>
             <p className="text-gray-600 mb-6">
-              Thank you for pre-ordering "{orderDetails?.productName}"
+              Thank you for ordering "{orderDetails?.productName}"
             </p>
 
             <div className="bg-gray-50 rounded-lg p-6 mb-6">
@@ -104,7 +104,7 @@ const PaymentSuccess = () => {
             <div className="text-left mb-6">
               <h2 className="font-semibold text-gray-900 mb-2">What happens next?</h2>
               <p className="text-gray-600">
-                You will receive a confirmation email with your pre-order details.
+                You will receive a confirmation email with your order details.
               </p>
             </div>
 

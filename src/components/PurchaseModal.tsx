@@ -6,13 +6,13 @@ import { useNavigate } from 'react-router-dom';
 const BOOK_FORMATS = {
   PAPERBACK: {
     name: 'Paperback',
-    price: 12000, // ₦12,000 (20% off from ₦15,000)
-    isPreorder: false
+    price: 15000, // ₦12,000 (20% off from ₦15,000)
+    isorder: false
   },
   EBOOK: {
     name: 'E-Book',
     price: 10000, // ₦8,000 (20% off from ₦10,000)
-    isPreorder: true
+    isorder: true
   }
 };
 
@@ -22,14 +22,14 @@ interface PurchaseModalProps {
   isOpen: boolean;
   onClose: () => void;
   email?: string;
-  isPreorderOnly?: boolean;
+  isorderOnly?: boolean;
 }
 
 const PurchaseModal: React.FC<PurchaseModalProps> = ({
   isOpen,
   onClose,
   email = '',
-  isPreorderOnly = false
+  isorderOnly = false
 }) => {
   const navigate = useNavigate();
   const [selectedFormat, setSelectedFormat] = useState<BookFormat>('EBOOK');
@@ -47,12 +47,12 @@ const PurchaseModal: React.FC<PurchaseModalProps> = ({
   useEffect(() => {
     if (isOpen) {
       // Set default format based on which button was clicked
-      setSelectedFormat(isPreorderOnly ? 'EBOOK' : 'PAPERBACK');
+      setSelectedFormat(isorderOnly ? 'EBOOK' : 'PAPERBACK');
       setQuantity(1);
       setUserEmail(email);
       setEmailError('');
     }
-  }, [isOpen, email, isPreorderOnly]);
+  }, [isOpen, email, isorderOnly]);
 
   // Validate email
   const validateEmail = (email: string) => {
@@ -176,7 +176,7 @@ const PurchaseModal: React.FC<PurchaseModalProps> = ({
           {/* Email input */}
           <div className="mb-6">
             <p className="block text-gray-700 text-sm font-bold mb-2">
-              Your Email Address (required for pre-order)
+              Your Email Address (required for order)
             </p>
             <input
               type="email"

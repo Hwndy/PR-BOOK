@@ -22,7 +22,7 @@ interface PaystackPop {
     reference: string;
     metadata: {
       product_name?: string;
-      is_preorder?: boolean;
+      is_order?: boolean;
       [key: string]: any;
     };
     callback: (response: PaystackResponse) => void;
@@ -260,7 +260,7 @@ const PaymentPage: React.FC<PaymentPageProps> = () => {
           reference: reference,
           metadata: {
             product_name: productName,
-            is_preorder: true
+            is_order: true
           },
           callback: function(response: PaystackResponse) {
             console.log('Payment complete! Reference:', response.reference);
@@ -333,7 +333,7 @@ const PaymentPage: React.FC<PaymentPageProps> = () => {
   }, [email, initializePayment, loadPaystackScript]);
 
   const handleGoBack = () => {
-    navigate('/book#pre-order');
+    navigate('/book#order');
   };
 
   return (
@@ -347,7 +347,7 @@ const PaymentPage: React.FC<PaymentPageProps> = () => {
           Back to Book
         </button>
 
-        <h1 className="text-2xl font-bold text-gray-900 mb-6">Complete Your Pre-order</h1>
+        <h1 className="text-2xl font-bold text-gray-900 mb-6">Complete Your order</h1>
 
         {paymentStatus.message && (
           <div className={`mb-6 p-4 rounded-md ${
@@ -490,7 +490,7 @@ const PaymentPage: React.FC<PaymentPageProps> = () => {
         )}
 
         <div className="mt-6 text-sm text-gray-500">
-          <p>Your payment is securely processed by Paystack. You will receive a confirmation email once your pre-order is complete.</p>
+          <p>Your payment is securely processed by Paystack. You will receive a confirmation email once your order is complete.</p>
         </div>
       </div>
     </div>

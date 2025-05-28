@@ -6,11 +6,11 @@ import PurchaseModal from './PurchaseModal';
 const Book = () => {
   const navigate = useNavigate();
   const [isPurchaseModalOpen, setIsPurchaseModalOpen] = useState(false);
-  const [isPreorderOnly, setIsPreorderOnly] = useState(false);
+  const [isorderOnly, setIsorderOnly] = useState(false);
 
   const handlePurchase = () => {
     // Open purchase modal with all formats
-    setIsPreorderOnly(false);
+    setIsorderOnly(false);
     setIsPurchaseModalOpen(true);
   };
 
@@ -87,7 +87,7 @@ const Book = () => {
       <PurchaseModal
         isOpen={isPurchaseModalOpen}
         onClose={() => setIsPurchaseModalOpen(false)}
-        isPreorderOnly={isPreorderOnly}
+        isorderOnly={isorderOnly}
       />
     </section>
   );

@@ -110,15 +110,15 @@ const sendConfirmationEmail = async (order) => {
     const mailOptions = {
       from: process.env.EMAIL_FROM || '"The Science of PR" <noreply@thescienceofpr.com>',
       to: order.email,
-      subject: 'Your Pre-order Confirmation - The Science of Public Relations',
+      subject: 'Your order Confirmation - The Science of Public Relations',
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
           <div style="background-color: #1e3a8a; color: white; padding: 20px; text-align: center;">
-            <h1 style="margin: 0;">Thank You for Your Pre-order!</h1>
+            <h1 style="margin: 0;">Thank You for Your order!</h1>
           </div>
           <div style="padding: 20px; border: 1px solid #e5e7eb; border-top: none;">
             <p>Dear Customer,</p>
-            <p>Thank you for pre-ordering "The Science of Public Relations". Your payment has been successfully processed.</p>
+            <p>Thank you for ordering "The Science of Public Relations". Your payment has been successfully processed.</p>
             <div style="background-color: #f3f4f6; padding: 15px; border-radius: 5px; margin: 20px 0;">
               <h3 style="margin-top: 0;">Order Details:</h3>
               <p><strong>Product:</strong> ${order.productName}</p>
@@ -177,7 +177,7 @@ app.post('/api/initialize-payment', async (req, res) => {
           callback_url: `${req.protocol}://${req.get('host')}/payment-success`,
           metadata: {
             product_name: productName,
-            is_preorder: true
+            is_order: true
           }
         },
         {

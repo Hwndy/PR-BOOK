@@ -104,9 +104,9 @@ const BookPage = () => {
     setCurrentTestimonial((prev) => (prev - 1 + testimonials.length) % testimonials.length);
   };
 
-  // State for email input in pre-order section
-  const [preOrderEmail, setPreOrderEmail] = useState('');
-  const [preOrderEmailError, setPreOrderEmailError] = useState('');
+  // State for email input in order section
+  const [orderEmail, setorderEmail] = useState('');
+  const [orderEmailError, setorderEmailError] = useState('');
 
   // Function to validate email
   const validateEmail = (email: string) => {
@@ -123,15 +123,15 @@ const BookPage = () => {
 
   // State for purchase modal
   const [isPurchaseModalOpen, setIsPurchaseModalOpen] = useState(false);
-  const [isPreorderOnly, setIsPreorderOnly] = useState(false);
+  const [isorderOnly, setIsorderOnly] = useState(false);
 
-  // Function to handle pre-order button click
-  const handlePreOrder = () => {
+  // Function to handle order button click
+  const handleorder = () => {
     // Reset payment status
     setPaymentStatus({ message: '', type: null });
 
-    // Set pre-order only mode
-    setIsPreorderOnly(true);
+    // Set order only mode
+    setIsorderOnly(true);
 
     // Open purchase modal
     setIsPurchaseModalOpen(true);
@@ -171,10 +171,10 @@ const BookPage = () => {
 
               <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-6 justify-center lg:justify-start">
                 <button
-                  onClick={handlePreOrder}
+                  onClick={handleorder}
                   className="w-full sm:w-auto bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-3 px-6 sm:px-8 rounded-md shadow-lg transition duration-300 flex items-center justify-center touch-target"
                 >
-                  Pre-order Now <ChevronRight className="ml-2 h-5 w-5" />
+                  order Now <ChevronRight className="ml-2 h-5 w-5" />
                 </button>
               </div>
             </div>
@@ -317,11 +317,11 @@ const BookPage = () => {
           </div>
         </div>
       </section>
-      {/* Pre-order Section */}
-      <section id="pre-order" className="py-12 sm:py-16 bg-gradient-to-br from-blue-900 to-blue-700 text-white">
+      {/* order Section */}
+      <section id="order" className="py-12 sm:py-16 bg-gradient-to-br from-blue-900 to-blue-700 text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-10">
-            <h2 className="text-2xl sm:text-3xl font-bold mb-4">Pre-order Your Copy Today</h2>
+            <h2 className="text-2xl sm:text-3xl font-bold mb-4">order Your Copy Today</h2>
             <div className="w-24 h-1 bg-yellow-500 mx-auto mb-8"></div>
             <p className="max-w-2xl mx-auto text-blue-100 text-lg">
               Be among the first to receive "The Science of Public Relations" and get exclusive Bonus
@@ -332,29 +332,29 @@ const BookPage = () => {
             <div className="flex flex-col gap-6">
               <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
                 <div>
-                  <h3 className="text-xl font-bold mb-2">Special Pre-order Price</h3>
+                  <h3 className="text-xl font-bold mb-2">Special order Price</h3>
                   <p className="text-blue-100 mb-4">Limited time offer with exclusive Discount</p>
                   <div className="flex items-baseline">
-                    <span className="text-3xl font-bold">₦12,000</span>
-                    <span className="text-blue-200 line-through ml-2">₦15,000</span>
-                    <span className="bg-yellow-500 text-white text-xs font-bold px-2 py-1 rounded-full ml-2">SAVE 20%</span>
+                    <span className="text-3xl font-bold">₦15000</span>
+                    {/* <span className="text-blue-200 line-through ml-2">₦15,000</span> */}
+                    {/* <span className="bg-yellow-500 text-white text-xs font-bold px-2 py-1 rounded-full ml-2">SAVE 20%</span> */}
                   </div>
                 </div>
               </div>
 
               <div className="w-full">
-                <label htmlFor="preOrderEmail" className="block text-sm font-medium text-white mb-1">
-                  Your Email Address (required for pre-order)
+                <label htmlFor="orderEmail" className="block text-sm font-medium text-white mb-1">
+                  Your Email Address (required for order)
                 </label>
                 <input
                   type="email"
-                  id="preOrderEmail"
-                  value={preOrderEmail}
-                  onChange={(e) => setPreOrderEmail(e.target.value)}
-                  className={`w-full px-3 sm:px-4 py-2 sm:py-3 border ${preOrderEmailError ? 'border-red-500' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition duration-200 text-sm sm:text-base`}
+                  id="orderEmail"
+                  value={orderEmail}
+                  onChange={(e) => setorderEmail(e.target.value)}
+                  className={`w-full px-3 sm:px-4 py-2 sm:py-3 border ${orderEmailError ? 'border-red-500' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition duration-200 text-sm sm:text-base`}
                   placeholder="your.email@example.com"
                 />
-                {preOrderEmailError && <p className="mt-1 text-sm text-red-300">{preOrderEmailError}</p>}
+                {orderEmailError && <p className="mt-1 text-sm text-red-300">{orderEmailError}</p>}
               </div>
 
               {paymentStatus.message && (
@@ -368,10 +368,10 @@ const BookPage = () => {
               )}
 
               <button
-                onClick={handlePreOrder}
+                onClick={handleorder}
                 className="w-full bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-3 px-8 rounded-md shadow-lg transition duration-300 flex items-center justify-center"
               >
-                Pre-order Now <ChevronRight className="ml-2 h-5 w-5" />
+                order Now <ChevronRight className="ml-2 h-5 w-5" />
               </button>
             </div>
           </div>
@@ -448,8 +448,8 @@ const BookPage = () => {
       <PurchaseModal
         isOpen={isPurchaseModalOpen}
         onClose={() => setIsPurchaseModalOpen(false)}
-        email={preOrderEmail}
-        isPreorderOnly={isPreorderOnly}
+        email={orderEmail}
+        isorderOnly={isorderOnly}
       />
     </div>
   );

@@ -1,11 +1,15 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
+import PurchaseModal from './PurchaseModal';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
+  // Add state for purchase modal
+  const [isPurchaseModalOpen, setIsPurchaseModalOpen] = useState(false);
+  const [isorderOnly, setIsorderOnly] = useState(true);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -21,6 +25,13 @@ const Navbar = () => {
       window.removeEventListener('scroll', handleScroll);
     };
   }, []);
+
+  // Add handler for order button
+  const handleorder = () => {
+    setIsorderOnly(true);
+    setIsPurchaseModalOpen(true);
+    setIsOpen(false); // Close mobile menu if open
+  };
 
   const navItems = [
     { path: '/', label: 'Home' },
@@ -62,12 +73,12 @@ const Navbar = () => {
           </div>
 
           <div className="hidden md:flex">
-            <Link
-              to="/book"
+            <button
+              onClick={handleorder}
               className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition duration-300 shadow-md whitespace-nowrap"
             >
-              Pre-order Book
-            </Link>
+              order Book
+            </button>
           </div>
 
           {/* Single Mobile Menu Button */}
@@ -96,16 +107,22 @@ const Navbar = () => {
             </Link>
           ))}
           <div className="mt-4 px-3">
-            <Link
-              to="/book"
+            <button
+              onClick={handleorder}
               className="block w-full bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition duration-300 shadow-md text-center whitespace-nowrap"
-              onClick={() => setIsOpen(false)}
             >
-              Pre-order Book
-            </Link>
+              order Book
+            </button>
           </div>
         </div>
       </div>
+
+      {/* Purchase Modal */}
+      <PurchaseModal
+        isOpen={isPurchaseModalOpen}
+        onClose={() => setIsPurchaseModalOpen(false)}
+        isorderOnly={isorderOnly}
+      />
     </nav>
   );
 };

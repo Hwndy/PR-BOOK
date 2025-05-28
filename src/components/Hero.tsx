@@ -5,10 +5,10 @@ import PurchaseModal from './PurchaseModal';
 
 const Hero = () => {
   const [isPurchaseModalOpen, setIsPurchaseModalOpen] = useState(false);
-  const [isPreorderOnly, setIsPreorderOnly] = useState(true);
+  const [isorderOnly, setIsorderOnly] = useState(true);
 
-  const handlePreOrder = () => {
-    setIsPreorderOnly(true);
+  const handleorder = () => {
+    setIsorderOnly(true);
     setIsPurchaseModalOpen(true);
   };
   return (
@@ -43,13 +43,13 @@ const Hero = () => {
 
             <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-6 mt-4 sm:mt-6">
               <button
-                onClick={handlePreOrder}
+                onClick={handleorder}
                 className="w-full sm:w-auto bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-3 px-6 sm:px-8 rounded-md shadow-lg transition duration-300 flex items-center justify-center touch-target"
               >
-                Pre-order Now <ChevronRight className="ml-2 h-5 w-5" />
+                order Now <ChevronRight className="ml-2 h-5 w-5" />
               </button>
               <Link
-                to="/about"
+                to="/book"
                 className="w-full sm:w-auto bg-transparent hover:bg-white/10 text-white border border-white/30 font-medium py-3 px-6 sm:px-8 rounded-md transition duration-300 flex items-center justify-center touch-target"
               >
                 Learn More
@@ -83,12 +83,12 @@ const Hero = () => {
                 />
                 <div className="p-4 sm:p-6">
                   <div className="flex flex-wrap items-center justify-between mb-3 sm:mb-4 gap-2">
-                    <span className="text-yellow-400 font-semibold text-sm sm:text-base">Pre-order Special</span>
+                    <span className="text-yellow-400 font-semibold text-sm sm:text-base">order Special</span>
                     <span className="bg-yellow-500 px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm">Save 20%</span>
                   </div>
                   <h3 className="text-lg sm:text-xl font-semibold mb-2">The Science of Public Relations</h3>
                   <p className="text-gray-300 text-xs sm:text-sm mb-3 sm:mb-4">
-                    Get exclusive discount when you pre-order today!
+                    Get exclusive discount when you order today!
                   </p>
                 </div>
               </div>
@@ -125,7 +125,7 @@ const Hero = () => {
       <PurchaseModal
         isOpen={isPurchaseModalOpen}
         onClose={() => setIsPurchaseModalOpen(false)}
-        isPreorderOnly={isPreorderOnly}
+        isorderOnly={isorderOnly}
       />
     </section>
   );

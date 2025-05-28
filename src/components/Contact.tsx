@@ -72,8 +72,8 @@ const Contact = () => {
                 <div className="flex items-start">
                   <MapPin className="h-5 w-5 sm:h-6 sm:w-6 text-blue-300 mt-1 flex-shrink-0" />
                   <div className="ml-3 sm:ml-4">
-                    <p className="text-white font-medium text-sm sm:text-base">Visit Us</p>
-                    <p className="text-blue-100 text-sm sm:text-base">
+                    {/* <p className="text-white font-medium text-sm sm:text-base">Visit Us</p> */}
+                    <p className="text-white-100 text-sm sm:text-base">
                       OLUFEMI STREET<br />
                       SURULERE, LAGOS
                     </p>
