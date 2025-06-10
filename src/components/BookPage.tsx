@@ -174,7 +174,7 @@ const BookPage = () => {
                   onClick={handleorder}
                   className="w-full sm:w-auto bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-3 px-6 sm:px-8 rounded-md shadow-lg transition duration-300 flex items-center justify-center touch-target"
                 >
-                  order Now <ChevronRight className="ml-2 h-5 w-5" />
+                  Order Now <ChevronRight className="ml-2 h-5 w-5" />
                 </button>
               </div>
             </div>
@@ -321,7 +321,7 @@ const BookPage = () => {
       <section id="order" className="py-12 sm:py-16 bg-gradient-to-br from-blue-900 to-blue-700 text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-10">
-            <h2 className="text-2xl sm:text-3xl font-bold mb-4">order Your Copy Today</h2>
+            <h2 className="text-2xl sm:text-3xl font-bold mb-4">Order Your Copy Today</h2>
             <div className="w-24 h-1 bg-yellow-500 mx-auto mb-8"></div>
             <p className="max-w-2xl mx-auto text-blue-100 text-lg">
               Be among the first to receive "The Science of Public Relations" and get exclusive Bonus
@@ -332,8 +332,8 @@ const BookPage = () => {
             <div className="flex flex-col gap-6">
               <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
                 <div>
-                  <h3 className="text-xl font-bold mb-2">Special order Price</h3>
-                  <p className="text-blue-100 mb-4">Limited time offer with exclusive Discount</p>
+                  <h3 className="text-xl font-bold mb-2">Order Price</h3>
+                  {/* <p className="text-blue-100 mb-4">Limited time offer with exclusive Discount</p> */}
                   <div className="flex items-baseline">
                     <span className="text-3xl font-bold">₦15000</span>
                     {/* <span className="text-blue-200 line-through ml-2">₦15,000</span> */}
@@ -371,7 +371,7 @@ const BookPage = () => {
                 onClick={handleorder}
                 className="w-full bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-3 px-8 rounded-md shadow-lg transition duration-300 flex items-center justify-center"
               >
-                order Now <ChevronRight className="ml-2 h-5 w-5" />
+                Order Now <ChevronRight className="ml-2 h-5 w-5" />
               </button>
             </div>
           </div>

@@ -68,7 +68,7 @@ const HomeSummary = () => {
               <h3 className="text-xl font-bold font-futura text-gray-900">About the TSoPR</h3>
             </div>
             <div className="flex flex-col sm:flex-row gap-8 mb-6">
-              <div className="w-full sm:w-1/3">
+              <div className="w-full sm:w-2/3">
                 <img
                   src="/logo.png"
                   alt="Philip Odiakose - Author"

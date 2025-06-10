@@ -6,6 +6,10 @@ const dotenv = require('dotenv');
 const mongoose = require('mongoose');
 const nodemailer = require('nodemailer');
 const crypto = require('crypto');
+const adminRoutes = require('./routes/admin');
+const podcastRoutes = require('./routes/podcast');
+const blogRoutes = require('./routes/blog');
+const ebookRoutes = require('./routes/ebook');
 
 // Load environment variables
 dotenv.config();
@@ -17,6 +21,12 @@ const PORT = process.env.PORT || 5000;
 // Middleware
 app.use(cors());
 app.use(bodyParser.json());
+
+// Routes
+app.use('/api/admin', adminRoutes);
+app.use('/api/podcast', podcastRoutes);
+app.use('/api/blog', blogRoutes);
+app.use('/api/ebook', ebookRoutes);
 
 // Paystack secret key from environment variables
 const PAYSTACK_SECRET_KEY = process.env.PAYSTACK_SECRET_KEY || 'sk_live_0342e2f7f4cd019d29a99b60b18b68d40955d9a0';
@@ -98,6 +108,27 @@ try {
   console.error('Error configuring email transporter:', error);
 }
 
+// Function to generate reading URL for e-books
+const generateReadingURL = async (order) => {
+  try {
+    if (!order.productName || (!order.productName.toLowerCase().includes('digital') && !order.productName.toLowerCase().includes('e-book'))) {
+      return null; // Not an e-book order
+    }
+
+    const axios = require('axios');
+    const response = await axios.post('http://localhost:5000/api/ebook/generate-reading-url', {
+      email: order.email,
+      orderReference: order.reference,
+      productName: order.productName
+    });
+
+    return response.data.readingUrl;
+  } catch (error) {
+    console.error('Error generating reading URL:', error);
+    return null;
+  }
+};
+
 // Function to send confirmation email
 const sendConfirmationEmail = async (order) => {
   try {
@@ -107,18 +138,25 @@ const sendConfirmationEmail = async (order) => {
       return true;
     }
 
+    // Generate reading URL for e-books
+    const readingUrl = await generateReadingURL(order);
+
+    // Create email content based on product type
+    const isEbook = readingUrl !== null;
+
     const mailOptions = {
       from: process.env.EMAIL_FROM || '"The Science of PR" <noreply@thescienceofpr.com>',
       to: order.email,
-      subject: 'Your order Confirmation - The Science of Public Relations',
+      subject: isEbook ? 'Your E-book is Ready to Read! - The Science of Public Relations' : 'Your Order Confirmation - The Science of Public Relations',
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
           <div style="background-color: #1e3a8a; color: white; padding: 20px; text-align: center;">
-            <h1 style="margin: 0;">Thank You for Your order!</h1>
+            <h1 style="margin: 0;">${isEbook ? 'Your E-book is Ready!' : 'Thank You for Your Order!'}</h1>
           </div>
           <div style="padding: 20px; border: 1px solid #e5e7eb; border-top: none;">
             <p>Dear Customer,</p>
-            <p>Thank you for ordering "The Science of Public Relations". Your payment has been successfully processed.</p>
+            <p>Thank you for purchasing "The Science of Public Relations". Your payment has been successfully processed.</p>
+
             <div style="background-color: #f3f4f6; padding: 15px; border-radius: 5px; margin: 20px 0;">
               <h3 style="margin-top: 0;">Order Details:</h3>
               <p><strong>Product:</strong> ${order.productName}</p>
@@ -126,7 +164,30 @@ const sendConfirmationEmail = async (order) => {
               <p><strong>Reference:</strong> ${order.reference}</p>
               <p><strong>Date:</strong> ${new Date(order.paymentDate).toLocaleString()}</p>
             </div>
-            <p>We will notify you when the book is available for download or shipping. In the meantime, you'll receive a confirmation mail shortly.</p>
+
+            ${isEbook ? `
+              <div style="background-color: #dbeafe; border: 2px solid #3b82f6; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                <h3 style="color: #1e40af; margin-top: 0;">🔒 Secure Reading Access</h3>
+                <p style="margin-bottom: 15px;">Your e-book is ready to read online! Click the button below to start reading:</p>
+                <div style="text-align: center; margin: 20px 0;">
+                  <a href="${readingUrl}" style="background-color: #3b82f6; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block;">
+                    📖 Read Your E-book Now
+                  </a>
+                </div>
+                <div style="background-color: #fef3c7; border: 1px solid #f59e0b; padding: 12px; border-radius: 4px; margin-top: 15px;">
+                  <h4 style="color: #92400e; margin: 0 0 8px 0; font-size: 14px;">🛡️ Important Security Information:</h4>
+                  <ul style="color: #92400e; font-size: 13px; margin: 0; padding-left: 20px;">
+                    <li>This reading link is personal and expires in 24 hours</li>
+                    <li>Do not share this link - it will stop working if accessed from multiple devices</li>
+                    <li>Only one active reading session is allowed at a time</li>
+                    <li>The book cannot be downloaded or copied for security</li>
+                  </ul>
+                </div>
+              </div>
+            ` : `
+              <p>We will notify you when the book is available for download or shipping. In the meantime, you'll receive updates on your order status.</p>
+            `}
+
             <p>If you have any questions, please don't hesitate to contact us.</p>
             <p>Best regards,<br>The Science of PR Team</p>
           </div>
@@ -635,6 +696,13 @@ app.get('/payment-success', (req, res) => {
   }
 
   res.redirect(redirectUrl.toString());
+});
+
+// E-book reading route handler
+app.get('/read-book/:token', (req, res) => {
+  // Redirect to the frontend e-book reader
+  const redirectUrl = `https://thescienceofpublicrelations.vercel.app/read-book/${req.params.token}`;
+  res.redirect(redirectUrl);
 });
 
 // Start the server

@@ -77,7 +77,7 @@ const Navbar = () => {
               onClick={handleorder}
               className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition duration-300 shadow-md whitespace-nowrap"
             >
-              order Book
+              Order Book
             </button>
           </div>
 
@@ -111,7 +111,7 @@ const Navbar = () => {
               onClick={handleorder}
               className="block w-full bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition duration-300 shadow-md text-center whitespace-nowrap"
             >
-              order Book
+              Order Book
             </button>
           </div>
         </div>

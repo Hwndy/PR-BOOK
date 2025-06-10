@@ -87,16 +87,17 @@ const Speaking = () => {
               <ul className="space-y-4">
                 <li className="flex items-center">
                   <MapPin className="h-5 w-5 text-blue-600 mr-2" />
-                  <span>PR Analytics Summit, Lagos</span>
+                  <span>PR Clinic – Lagos NIPR</span>
                 </li>
                 <li className="flex items-center">
                   <MapPin className="h-5 w-5 text-blue-600 mr-2" />
-                  <span>Digital PR Conference, Abuja</span>
+                  <span>4th Lagos Digital PR Summit – NIPR</span>
                 </li>
                 <li className="flex items-center">
                   <MapPin className="h-5 w-5 text-blue-600 mr-2" />
-                  <span>Media Measurement Forum, Port Harcourt</span>
+                  <span>NIPR Conference Uyo.</span>
                 </li>
+              
               </ul>
             </div>
           </div>

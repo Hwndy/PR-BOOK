@@ -16,37 +16,59 @@ import Speaking from './components/Speaking';
 import Podcast from './components/Podcast';
 import HomeSummary from './components/HomeSummary';
 import ScrollToTop from './components/ScrollToTop';
+import EbookReader from './components/EbookReader';
+import AdminLogin from './components/admin/AdminLogin';
+import AdminDashboard from './components/admin/AdminDashboard';
+import AdminRoute from './components/admin/AdminRoute';
+import { AdminProvider } from './contexts/AdminContext';
 import './index.css';
 
-// Fix: Use a consistent function declaration style and export
 const App = () => {
   return (
-    <Router>
-      <div className="min-h-screen">
-        <Navbar />
+    <AdminProvider>
+      <Router>
         <Routes>
-          <Route path="/" element={
-            <>
-              <Hero />
-              <HomeSummary />
-              <Book />
-              <Services />
-              {/* <CaseStudies /> */}
-            </>
+          {/* Admin Routes - No Navbar/Footer */}
+          <Route path="/admin/login" element={<AdminLogin />} />
+          <Route path="/admin/*" element={
+            <AdminRoute>
+              <AdminDashboard />
+            </AdminRoute>
           } />
-          <Route path="/about" element={<About />} />
-          <Route path="/podcast" element={<Podcast />} />
-          <Route path="/book" element={<BookPage />} />
-          <Route path="/payment" element={<PaymentPage />} />
-          <Route path="/payment-success" element={<PaymentSuccess />} />
-          <Route path="/speaking" element={<Speaking />} />
-          <Route path="/blog" element={<Blog />} />
-          <Route path="/contact" element={<Contact />} />
+
+          {/* E-book Reader - No Navbar/Footer */}
+          <Route path="/read-book/:token" element={<EbookReader />} />
+
+          {/* Main Website Routes - With Navbar/Footer */}
+          <Route path="/*" element={
+            <div className="min-h-screen">
+              <Navbar />
+              <Routes>
+                <Route path="/" element={
+                  <>
+                    <Hero />
+                    <HomeSummary />
+                    <Book />
+                    <Services />
+                    {/* <CaseStudies /> */}
+                  </>
+                } />
+                <Route path="/about" element={<About />} />
+                <Route path="/podcast" element={<Podcast />} />
+                <Route path="/book" element={<BookPage />} />
+                <Route path="/payment" element={<PaymentPage />} />
+                <Route path="/payment-success" element={<PaymentSuccess />} />
+                <Route path="/speaking" element={<Speaking />} />
+                <Route path="/blog" element={<Blog />} />
+                <Route path="/contact" element={<Contact />} />
+              </Routes>
+              <Footer />
+              <ScrollToTop />
+            </div>
+          } />
         </Routes>
-        <Footer />
-        <ScrollToTop />
-      </div>
-    </Router>
+      </Router>
+    </AdminProvider>
   );
 };
 

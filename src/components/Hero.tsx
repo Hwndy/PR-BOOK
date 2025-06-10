@@ -46,7 +46,7 @@ const Hero = () => {
                 onClick={handleorder}
                 className="w-full sm:w-auto bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-3 px-6 sm:px-8 rounded-md shadow-lg transition duration-300 flex items-center justify-center touch-target"
               >
-                order Now <ChevronRight className="ml-2 h-5 w-5" />
+                Order Now <ChevronRight className="ml-2 h-5 w-5" />
               </button>
               <Link
                 to="/book"
@@ -59,15 +59,15 @@ const Hero = () => {
             <div className="mt-8 sm:mt-14 grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
               <div className="flex items-center space-x-3 touch-target">
                 <BookOpen className="h-5 w-5 sm:h-6 sm:w-6 text-yellow-400 flex-shrink-0" />
-                <span className="text-sm text-gray-300">Author & A Media Analyst </span>
+                <span className="text-sm text-gray-300">Author  </span>
               </div>
               <div className="flex items-center space-x-3 touch-target">
                 <GraduationCap className="h-5 w-5 sm:h-6 sm:w-6 text-yellow-400 flex-shrink-0" />
-                <span className="text-sm text-gray-300">Specialist in PR Measurement</span>
+                <span className="text-sm text-gray-300">PR Measurement Specialist</span>
               </div>
               <div className="flex items-center space-x-3 touch-target">
                 <Award className="h-5 w-5 sm:h-6 sm:w-6 text-yellow-400 flex-shrink-0" />
-                <span className="text-sm text-gray-300">A Growing Podcaster</span>
+                <span className="text-sm text-gray-300">Media Analyst Podcaster</span>
               </div>
             </div>
           </div>
@@ -83,28 +83,28 @@ const Hero = () => {
                 />
                 <div className="p-4 sm:p-6">
                   <div className="flex flex-wrap items-center justify-between mb-3 sm:mb-4 gap-2">
-                    <span className="text-yellow-400 font-semibold text-sm sm:text-base">order Special</span>
-                    <span className="bg-yellow-500 px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm">Save 20%</span>
+                    {/* <span className="text-yellow-400 font-semibold text-sm sm:text-base">order Special</span> */}
+                    {/* <span className="bg-yellow-500 px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm">Save 20%</span> */}
                   </div>
                   <h3 className="text-lg sm:text-xl font-semibold mb-2">The Science of Public Relations</h3>
-                  <p className="text-gray-300 text-xs sm:text-sm mb-3 sm:mb-4">
+                  {/* <p className="text-gray-300 text-xs sm:text-sm mb-3 sm:mb-4">
                     Get exclusive discount when you order today!
-                  </p>
+                  </p> */}
                 </div>
               </div>
             </div>
 
-            <div className="absolute -bottom-6 -left-6 bg-gradient-to-br from-blue-500 to-blue-700 rounded-lg p-3 sm:p-4 shadow-xl animate-pulse-slow hidden sm:block">
-              <div className="flex items-center space-x-2">
-                <div className="h-8 w-8 sm:h-10 sm:w-10 bg-white rounded-full flex items-center justify-center">
-                  <BookOpen className="h-4 w-4 sm:h-6 sm:w-6 text-blue-500" />
-                </div>
-                <div>
-                  <p className="text-white font-bold text-xs sm:text-base">Coming Soon</p>
-                  <p className="text-white text-xs">MAY 2025</p>
-                </div>
-              </div>
-            </div>
+            {/* <div className="absolute -bottom-6 -left-6 bg-gradient-to-br from-blue-500 to-blue-700 rounded-lg p-3 sm:p-4 shadow-xl animate-pulse-slow hidden sm:block"> */}
+              {/* <div className="flex items-center space-x-2"> */}
+                {/* <div className="h-8 w-8 sm:h-10 sm:w-10 bg-white rounded-full flex items-center justify-center"> */}
+                  {/* <BookOpen className="h-4 w-4 sm:h-6 sm:w-6 text-blue-500" /> */}
+                {/* </div> */}
+                {/* <div> */}
+                  {/* <p className="text-white font-bold text-xs sm:text-base">Available Now!!</p> */}
+                  {/* <p className="text-white text-xs">MAY 2025</p> */}
+                {/* </div> */}
+              {/* </div> */}
+            {/* </div> */}
 
             <div className="block sm:hidden mt-4 bg-gradient-to-br from-blue-500 to-blue-700 rounded-lg p-3 shadow-xl">
               <div className="flex items-center space-x-2">
