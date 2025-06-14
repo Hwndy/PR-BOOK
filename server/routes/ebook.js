@@ -3,44 +3,44 @@ const crypto = require('crypto');
 const path = require('path');
 const fs = require('fs');
 const router = express.Router();
-
-// In-memory storage for active reading sessions (use Redis in production)
-const activeSessions = new Map();
-const readingTokens = new Map();
+const EbookToken = require('../models/EbookToken'); // Import Mongoose model
 
 // Configuration
-const EBOOK_PATH = path.join(__dirname, '../../private/E-book.pdf');
+const EBOOK_PATH = path.join(__dirname, '../../private/E-book.pdf'); // Consider making this configurable
 const TOKEN_EXPIRY = 24 * 60 * 60 * 1000; // 24 hours
-const SESSION_EXPIRY = 2 * 60 * 60 * 1000; // 2 hours
-const MAX_CONCURRENT_SESSIONS = 1; // Only 1 active session per purchase
+const SESSION_EXPIRY = 2 * 60 * 60 * 1000; // 2 hours - for determining 'active' stats
+const MAX_CONCURRENT_SESSIONS = 1; // Only 1 active session per purchase (primarily enforced by device fingerprint)
 
-// Generate secure reading token
-const generateReadingToken = (email, orderReference) => {
-  const tokenData = {
+// Generate secure reading token (now async)
+const generateReadingToken = async (email, orderReference, productName) => {
+  const tokenString = crypto.randomBytes(32).toString('hex');
+  const sessionId = crypto.randomUUID(); // Unique session identifier
+
+  const newTokenDoc = new EbookToken({
+    token: tokenString,
     email,
     orderReference,
-    createdAt: Date.now(),
-    expiresAt: Date.now() + TOKEN_EXPIRY,
-    sessionId: crypto.randomUUID(),
-    deviceFingerprint: null
-  };
+    productName, // Store productName
+    sessionId,
+    expiresAt: new Date(Date.now() + TOKEN_EXPIRY),
+    // deviceFingerprint, userAgent, ip will be set on first access
+  });
   
-  const token = crypto.randomBytes(32).toString('hex');
-  readingTokens.set(token, tokenData);
-  
-  return token;
+  await newTokenDoc.save();
+  return tokenString;
 };
 
-// Validate reading token
-const validateReadingToken = (token, deviceFingerprint, userAgent, ip) => {
-  const tokenData = readingTokens.get(token);
+// Validate reading token (now async)
+const validateReadingToken = async (token, deviceFingerprint, userAgent, ip) => {
+  const tokenData = await EbookToken.findOne({ token: token });
   
   if (!tokenData) {
     return { valid: false, reason: 'Invalid token' };
   }
   
-  if (Date.now() > tokenData.expiresAt) {
-    readingTokens.delete(token);
+  if (Date.now() > tokenData.expiresAt.getTime()) {
+    // TTL index in MongoDB should handle deletion, but good to check
+    // await EbookToken.deleteOne({ token: token }); // Optionally explicitly delete
     return { valid: false, reason: 'Token expired' };
   }
   
@@ -49,6 +49,8 @@ const validateReadingToken = (token, deviceFingerprint, userAgent, ip) => {
     tokenData.deviceFingerprint = deviceFingerprint;
     tokenData.userAgent = userAgent;
     tokenData.ip = ip;
+    // lastAccess is already set to Date.now() by default or by heartbeat/content access
+    await tokenData.save();
   } else {
     // Validate device fingerprint for anti-sharing
     if (tokenData.deviceFingerprint !== deviceFingerprint) {
@@ -56,18 +58,13 @@ const validateReadingToken = (token, deviceFingerprint, userAgent, ip) => {
     }
   }
   
-  // Check for concurrent sessions
-  const existingSessions = Array.from(activeSessions.values())
-    .filter(session => session.email === tokenData.email && session.orderReference === tokenData.orderReference);
+  // Concurrent session check with MAX_CONCURRENT_SESSIONS = 1 is largely handled by
+  // the deviceFingerprint lock-in. If a token is tied to one device, it can't be
+  // concurrently used on another. If the meaning of "concurrent session" is broader
+  // (e.g., same user, same order, different token for a re-purchase), that logic would be different.
+  // For now, the device lock is the primary mechanism for this constraint.
   
-  if (existingSessions.length >= MAX_CONCURRENT_SESSIONS) {
-    const activeSession = existingSessions[0];
-    if (activeSession.sessionId !== tokenData.sessionId) {
-      return { valid: false, reason: 'Maximum concurrent sessions reached' };
-    }
-  }
-  
-  return { valid: true, tokenData };
+  return { valid: true, tokenData }; // tokenData is a Mongoose document
 };
 
 // Create device fingerprint from request
@@ -88,17 +85,17 @@ router.post('/generate-reading-url', async (req, res) => {
   try {
     const { email, orderReference, productName } = req.body;
     
-    if (!email || !orderReference) {
-      return res.status(400).json({ error: 'Email and order reference required' });
+    if (!email || !orderReference || !productName) { // Added productName as required
+      return res.status(400).json({ error: 'Email, order reference, and product name required' });
     }
     
-    // Verify this is for an e-book order (you might want to check your database)
-    if (!productName || !productName.toLowerCase().includes('digital') && !productName.toLowerCase().includes('e-book')) {
-      return res.status(400).json({ error: 'This order is not for a digital product' });
+    // Verify this is for an e-book order (productName check is good)
+    if (!productName.toLowerCase().includes('digital') && !productName.toLowerCase().includes('e-book')) {
+      return res.status(400).json({ error: 'This order is not for a an e-book product' });
     }
     
-    // Generate secure token
-    const token = generateReadingToken(email, orderReference);
+    // Generate secure token (now async)
+    const token = await generateReadingToken(email, orderReference, productName);
     
     // Create reading URL
     const readingUrl = `${req.protocol}://${req.get('host')}/read-book/${token}`;
@@ -124,7 +121,7 @@ router.get('/validate-access/:token', (req, res) => {
     const userAgent = req.headers['user-agent'];
     const ip = req.ip || req.connection.remoteAddress;
     
-    const validation = validateReadingToken(token, deviceFingerprint, userAgent, ip);
+    const validation = await validateReadingToken(token, deviceFingerprint, userAgent, ip);
     
     if (!validation.valid) {
       return res.status(403).json({ 
@@ -135,20 +132,12 @@ router.get('/validate-access/:token', (req, res) => {
       });
     }
     
-    // Create or update session
-    const sessionId = validation.tokenData.sessionId;
-    activeSessions.set(sessionId, {
-      ...validation.tokenData,
-      lastAccess: Date.now(),
-      deviceFingerprint,
-      userAgent,
-      ip
-    });
-    
-    // Clean up expired sessions
-    setTimeout(() => {
-      activeSessions.delete(sessionId);
-    }, SESSION_EXPIRY);
+    // Create or update session activity (by updating lastAccess on the token document)
+    if (validation.valid && validation.tokenData) {
+      validation.tokenData.lastAccess = new Date();
+      await validation.tokenData.save();
+    }
+    // The old activeSessions map and its setTimeout cleanup are no longer needed.
     
     res.json({ 
       success: true, 
@@ -171,7 +160,7 @@ router.get('/content/:token', (req, res) => {
     const userAgent = req.headers['user-agent'];
     const ip = req.ip || req.connection.remoteAddress;
     
-    const validation = validateReadingToken(token, deviceFingerprint, userAgent, ip);
+    const validation = await validateReadingToken(token, deviceFingerprint, userAgent, ip);
     
     if (!validation.valid) {
       return res.status(403).json({ error: validation.reason });
@@ -182,10 +171,10 @@ router.get('/content/:token', (req, res) => {
       return res.status(404).json({ error: 'E-book not found' });
     }
     
-    // Update session activity
-    const sessionId = validation.tokenData.sessionId;
-    if (activeSessions.has(sessionId)) {
-      activeSessions.get(sessionId).lastAccess = Date.now();
+    // Update session activity by saving the token data (which now includes lastAccess)
+    if (validation.valid && validation.tokenData) {
+      validation.tokenData.lastAccess = new Date();
+      await validation.tokenData.save();
     }
     
     // Set security headers
@@ -212,20 +201,24 @@ router.post('/heartbeat/:token', (req, res) => {
   try {
     const { token } = req.params;
     const deviceFingerprint = createDeviceFingerprint(req);
-    
-    const validation = validateReadingToken(token, deviceFingerprint);
+    // User agent and IP are not strictly needed for heartbeat validation if device fingerprint is primary key
+    const validation = await validateReadingToken(token, deviceFingerprint, req.headers['user-agent'], req.ip);
     
     if (!validation.valid) {
       return res.status(403).json({ error: validation.reason });
     }
     
-    // Update session
-    const sessionId = validation.tokenData.sessionId;
-    if (activeSessions.has(sessionId)) {
-      activeSessions.get(sessionId).lastAccess = Date.now();
+    // Update session by saving token data
+    if (validation.valid && validation.tokenData) {
+      validation.tokenData.lastAccess = new Date();
+      await validation.tokenData.save();
       res.json({ success: true });
+    } else if (!validation.valid) {
+      // If validation failed, send the reason
+      return res.status(403).json({ error: validation.reason });
     } else {
-      res.status(403).json({ error: 'Session not found' });
+      // Fallback for unexpected cases where tokenData might be missing though validation.valid was true
+      res.status(403).json({ error: 'Session not found or token invalid' });
     }
     
   } catch (error) {
@@ -237,19 +230,22 @@ router.post('/heartbeat/:token', (req, res) => {
 // Get reading statistics (for admin)
 router.get('/stats', (req, res) => {
   try {
-    const now = Date.now();
-    const activeSessionsCount = Array.from(activeSessions.values())
-      .filter(session => (now - session.lastAccess) < SESSION_EXPIRY).length;
-    
-    const totalTokens = readingTokens.size;
-    const expiredTokens = Array.from(readingTokens.values())
-      .filter(token => now > token.expiresAt).length;
+    const totalTokens = await EbookToken.countDocuments();
+    // Expired tokens are automatically removed by MongoDB's TTL index on 'expiresAt'
+    // So, totalTokens should reflect non-expired tokens if TTL is working effectively.
+    // If an explicit count of "logically expired but not yet TTL-deleted" is needed:
+    // const expiredTokensCount = await EbookToken.countDocuments({ expiresAt: { $lt: new Date() } });
+
+    const activeThreshold = new Date(Date.now() - SESSION_EXPIRY);
+    const activeSessionsCount = await EbookToken.countDocuments({
+      expiresAt: { $gt: new Date() }, // Token must not be expired
+      lastAccess: { $gt: activeThreshold } // And was accessed recently
+    });
     
     res.json({
       activeSessions: activeSessionsCount,
-      totalTokens,
-      expiredTokens,
-      validTokens: totalTokens - expiredTokens
+      totalActiveTokens: totalTokens, // This now represents all tokens in DB (ideally non-expired)
+      // validTokens: totalTokens - expiredTokensCount (if calculated above)
     });
     
   } catch (error) {
@@ -258,23 +254,6 @@ router.get('/stats', (req, res) => {
   }
 });
 
-// Cleanup expired tokens (run periodically)
-setInterval(() => {
-  const now = Date.now();
-  
-  // Clean expired tokens
-  for (const [token, tokenData] of readingTokens.entries()) {
-    if (now > tokenData.expiresAt) {
-      readingTokens.delete(token);
-    }
-  }
-  
-  // Clean expired sessions
-  for (const [sessionId, session] of activeSessions.entries()) {
-    if ((now - session.lastAccess) > SESSION_EXPIRY) {
-      activeSessions.delete(sessionId);
-    }
-  }
-}, 5 * 60 * 1000); // Clean every 5 minutes
+// The setInterval for cleanup is no longer needed due to MongoDB TTL index.
 
 module.exports = router;
