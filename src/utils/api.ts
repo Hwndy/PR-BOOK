@@ -105,6 +105,27 @@ class ApiClient {
     
     return response.blob();
   }
+
+  // Public/Payment related endpoints
+  async initializePayment(email: string, amount: number, productName: string) {
+    return this.request<any>('/api/initialize-payment', {
+      method: 'POST',
+      body: JSON.stringify({ email, amount, productName }),
+    });
+  }
+
+  async verifyPayment(reference: string) {
+    return this.request<any>('/api/verify-payment', {
+      method: 'POST',
+      body: JSON.stringify({ reference }),
+    });
+  }
+
+  async getOrderDetails(reference: string) {
+    // Ensure this endpoint does not require auth if it's for post-payment verification by customer
+    // If it does, then the getAuthHeaders() will automatically add it if a token is present.
+    return this.request<any>(`/api/order/${reference}`);
+  }
 }
 
 export const apiClient = new ApiClient();

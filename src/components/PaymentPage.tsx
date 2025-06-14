@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { ChevronLeft, Check, AlertCircle } from 'lucide-react';
+import { apiClient } from '../../utils/api'; // Import apiClient
 
 // Component props type
 type PaymentPageProps = object;
@@ -134,15 +135,15 @@ const PaymentPage: React.FC<PaymentPageProps> = () => {
   // Function to verify payment with the server
   const verifyPayment = useCallback(async (reference: string) => {
     try {
-      const response = await fetch('https://pr-book.onrender.com/api/verify-payment', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ reference }),
-      });
-
-      const data = await response.json();
+      // const response = await fetch('https://pr-book.onrender.com/api/verify-payment', {
+      //   method: 'POST',
+      //   headers: {
+      //     'Content-Type': 'application/json',
+      //   },
+      //   body: JSON.stringify({ reference }),
+      // });
+      // const data = await response.json();
+      const data = await apiClient.verifyPayment(reference); // Use apiClient
 
       if (data.status) {
         // Payment verified successfully
@@ -207,19 +208,19 @@ const PaymentPage: React.FC<PaymentPageProps> = () => {
       }
 
       // First, initialize payment on the server to store order in database
-      const initResponse = await fetch('https://pr-book.onrender.com/api/initialize-payment', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email,
-          amount,
-          productName
-        }),
-      });
-
-      const initData = await initResponse.json();
+      // const initResponse = await fetch('https://pr-book.onrender.com/api/initialize-payment', {
+      //   method: 'POST',
+      //   headers: {
+      //     'Content-Type': 'application/json',
+      //   },
+      //   body: JSON.stringify({
+      //     email,
+      //     amount,
+      //     productName
+      //   }),
+      // });
+      // const initData = await initResponse.json();
+      const initData = await apiClient.initializePayment(email, parseInt(amount), productName); // Use apiClient
 
       if (!initData.status) {
         throw new Error(initData.message || 'Failed to initialize payment');
@@ -253,7 +254,7 @@ const PaymentPage: React.FC<PaymentPageProps> = () => {
         console.log('PaystackPop instance created successfully');
 
         paystack.newTransaction({
-          key: 'pk_live_2f49e5fc90b7dc3fb5465f8a684bf4e0b0405608', // Replace with your actual Paystack public key
+          key: PAYSTACK_PUBLIC_KEY, // Use PAYSTACK_PUBLIC_KEY constant
           email: email,
           amount: parseInt(amount) * 100, // Convert to kobo
           currency: 'NGN',
@@ -404,22 +405,25 @@ const PaymentPage: React.FC<PaymentPageProps> = () => {
                     setIsProcessing(true);
 
                     // Log what we're sending to the server
-                    console.log('Sending to server:', { email, amount, productName });
+                    const fallbackEmail = email || 'customer@example.com';
+                    const fallbackAmount = amount || '2999';
+                    const fallbackProductName = productName || 'The Science of Public Relations';
+                    console.log('Sending to server (direct checkout):', { email: fallbackEmail, amount: fallbackAmount, productName: fallbackProductName });
 
                     // Initialize payment on the server first
-                    const initResponse = await fetch('https://pr-book.onrender.com/api/initialize-payment', {
-                      method: 'POST',
-                      headers: {
-                        'Content-Type': 'application/json',
-                      },
-                      body: JSON.stringify({
-                        email: email || 'customer@example.com', // Provide a fallback email
-                        amount: amount || '2999',
-                        productName: productName || 'The Science of Public Relations'
-                      }),
-                    });
-
-                    const initData = await initResponse.json();
+                    // const initResponse = await fetch('https://pr-book.onrender.com/api/initialize-payment', {
+                    //   method: 'POST',
+                    //   headers: {
+                    //     'Content-Type': 'application/json',
+                    //   },
+                    //   body: JSON.stringify({
+                    //     email: fallbackEmail,
+                    //     amount: fallbackAmount,
+                    //     productName: fallbackProductName
+                    //   }),
+                    // });
+                    // const initData = await initResponse.json();
+                    const initData = await apiClient.initializePayment(fallbackEmail, parseInt(fallbackAmount), fallbackProductName); // Use apiClient
 
                     if (!initData.status) {
                       throw new Error(initData.message || 'Failed to initialize payment');
