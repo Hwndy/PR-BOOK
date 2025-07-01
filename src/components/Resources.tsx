@@ -178,6 +178,10 @@ const Resources = () => {
                   src={post.image}
                   alt={post.title}
                   className="w-full h-48 object-cover transition-transform duration-500 group-hover:scale-105"
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    target.src = 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80';
+                  }}
                 />
               </div>
               <div className="p-6">

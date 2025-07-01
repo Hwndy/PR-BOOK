@@ -9,7 +9,7 @@ const router = express.Router();
 // Configure multer for image uploads
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    const uploadDir = path.join(__dirname, '../../uploads/resources');
+    const uploadDir = path.join(__dirname, '../uploads/resources');
     if (!fs.existsSync(uploadDir)) {
       fs.mkdirSync(uploadDir, { recursive: true });
     }
@@ -235,7 +235,10 @@ router.post('/posts', upload.single('image'), async (req, res) => {
     // Handle image - either uploaded file or URL
     let image = imageUrl || '';
     if (req.file) {
-      image = `/uploads/resources/${req.file.filename}`;
+      // Generate full URL for production
+      const baseUrl = process.env.PUBLIC_URL || process.env.BACKEND_URL || 'https://pr-book.onrender.com';
+      image = `${baseUrl}/uploads/resources/${req.file.filename}`;
+      console.log('Generated image URL:', image);
     }
 
     const newPost = {
@@ -268,7 +271,10 @@ router.post('/posts', upload.single('image'), async (req, res) => {
     };
 
     manualResourcePosts.unshift(newPost); // Add to beginning of array
-    
+
+    console.log('Created new resource post with image URL:', newPost.image);
+    console.log('Total manual posts:', manualResourcePosts.length);
+
     res.status(201).json({
       message: 'Resource post created successfully',
       post: newPost
@@ -310,13 +316,16 @@ router.put('/posts/:id', upload.single('image'), async (req, res) => {
     let image = imageUrl || existingPost.image;
     if (req.file) {
       // Delete old image if it exists
-      if (existingPost.image && existingPost.image.startsWith('/uploads/')) {
-        const oldImagePath = path.join(__dirname, '../..', existingPost.image);
+      if (existingPost.image && (existingPost.image.includes('/uploads/') || existingPost.image.startsWith('/uploads/'))) {
+        const oldImagePath = path.join(__dirname, '../uploads/resources', path.basename(existingPost.image));
         if (fs.existsSync(oldImagePath)) {
           fs.unlinkSync(oldImagePath);
         }
       }
-      image = `/uploads/resources/${req.file.filename}`;
+      // Generate full URL for production
+      const baseUrl = process.env.PUBLIC_URL || process.env.BACKEND_URL || 'https://pr-book.onrender.com';
+      image = `${baseUrl}/uploads/resources/${req.file.filename}`;
+      console.log('Updated image URL:', image);
     }
 
     const updatedPost = {
@@ -421,7 +430,10 @@ router.post('/upload-image', upload.single('image'), (req, res) => {
       return res.status(400).json({ error: 'No image file provided' });
     }
 
-    const imageUrl = `/uploads/resources/${req.file.filename}`;
+    // Generate full URL for production
+    const baseUrl = process.env.PUBLIC_URL || process.env.BACKEND_URL || 'https://pr-book.onrender.com';
+    const imageUrl = `${baseUrl}/uploads/resources/${req.file.filename}`;
+    console.log('Upload endpoint - generated image URL:', imageUrl);
     res.json({
       message: 'Image uploaded successfully',
       imageUrl: imageUrl

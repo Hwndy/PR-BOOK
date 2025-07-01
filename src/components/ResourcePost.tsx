@@ -141,6 +141,10 @@ const ResourcePost = () => {
               src={post.image}
               alt={post.title}
               className="w-full h-full object-cover"
+              onError={(e) => {
+                const target = e.target as HTMLImageElement;
+                target.src = 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80';
+              }}
             />
             <div className="absolute inset-0 bg-black bg-opacity-20"></div>
           </div>

@@ -37,10 +37,15 @@ app.use(cors({
 app.use(bodyParser.json());
 
 // Serve static files from uploads directory
-app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+const uploadsPath = path.join(__dirname, 'uploads');
+app.use('/uploads', express.static(uploadsPath));
 
-// Static file serving for uploads
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+// Ensure uploads directory exists
+const fs = require('fs');
+if (!fs.existsSync(uploadsPath)) {
+  fs.mkdirSync(uploadsPath, { recursive: true });
+  console.log('Created uploads directory:', uploadsPath);
+}
 
 // Routes
 app.use('/api/auth', authRoutes);
@@ -48,6 +53,31 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/podcast', podcastRoutes);
 app.use('/api/resources', resourceRoutes);
 app.use('/api/ebook', ebookRoutes);
+
+// Test endpoint for image serving
+app.get('/api/test-uploads', (req, res) => {
+  const fs = require('fs');
+  const uploadsPath = path.join(__dirname, 'uploads');
+
+  try {
+    const resourcesPath = path.join(uploadsPath, 'resources');
+    let files = [];
+
+    if (fs.existsSync(resourcesPath)) {
+      files = fs.readdirSync(resourcesPath);
+    }
+
+    res.json({
+      uploadsPath,
+      resourcesPath,
+      files,
+      baseUrl: process.env.BACKEND_URL || 'http://localhost:5000',
+      message: 'Upload directory status'
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
 
 // Paystack secret key from environment variables
 const PAYSTACK_SECRET_KEY = process.env.PAYSTACK_SECRET_KEY || 'sk_live_0342e2f7f4cd019d29a99b60b18b68d40955d9a0';
