@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, ExternalLink, Heart, MessageCircle, Share2, Calendar, User, Tag, Loader } from 'lucide-react';
+import SEOHead from './SEOHead';
 
 interface ResourcePost {
   id: string;
@@ -118,7 +119,18 @@ const ResourcePost = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <>
+      <SEOHead
+        title={post.seoTitle || post.title}
+        description={post.seoDescription || post.excerpt}
+        image={post.image}
+        url={`/resources/${post.slug || post.id}`}
+        type="article"
+        author={post.author}
+        publishedTime={post.publishedAt}
+        tags={post.tags}
+      />
+      <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <div className="bg-white shadow-sm">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
@@ -246,6 +258,7 @@ const ResourcePost = () => {
         </div>
       </article>
     </div>
+    </>
   );
 };
 

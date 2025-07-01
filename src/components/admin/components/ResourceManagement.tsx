@@ -784,30 +784,39 @@ const ResourceManagement: React.FC = () => {
       {/* Preview Modal */}
       {isPreviewModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
-            <div className="flex justify-between items-center p-6 border-b border-gray-200">
-              <h3 className="text-lg font-medium text-gray-900">Preview Resource</h3>
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-5xl max-h-[95vh] overflow-hidden flex flex-col">
+            {/* Header */}
+            <div className="flex justify-between items-center p-6 border-b border-gray-200 bg-gray-50">
+              <div>
+                <h3 className="text-xl font-semibold text-gray-900">Preview Resource</h3>
+                <p className="text-sm text-gray-600 mt-1">See how your resource will appear to readers</p>
+              </div>
               <button
                 onClick={() => setIsPreviewModalOpen(false)}
-                className="text-gray-400 hover:text-gray-600"
+                className="text-gray-400 hover:text-gray-600 transition-colors p-2 hover:bg-gray-200 rounded-lg"
               >
                 <X className="h-6 w-6" />
               </button>
             </div>
 
-            <div className="p-6">
-              {/* Preview Content */}
-              <article className="max-w-none">
-                {/* Hero Image */}
-                {imagePreview && (
-                  <div className="relative h-64 md:h-80 mb-8 rounded-lg overflow-hidden">
-                    <img
-                      src={imagePreview}
-                      alt={formData.title}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                )}
+            {/* Scrollable Content */}
+            <div className="flex-1 overflow-y-auto">
+              <div className="p-8">
+                {/* Preview Content */}
+                <article className="max-w-none">
+                  {/* Hero Image with Fixed Dimensions */}
+                  {imagePreview && (
+                    <div className="relative mb-8 rounded-xl overflow-hidden shadow-lg">
+                      <div className="aspect-video w-full bg-gray-100 flex items-center justify-center">
+                        <img
+                          src={imagePreview}
+                          alt={formData.title}
+                          className="w-full h-full object-cover"
+                          style={{ aspectRatio: '16/9' }}
+                        />
+                      </div>
+                    </div>
+                  )}
 
                 {/* Meta Information */}
                 <div className="flex flex-wrap items-center gap-4 mb-6 text-sm text-gray-600">
@@ -850,10 +859,11 @@ const ResourceManagement: React.FC = () => {
                 {/* Content */}
                 <div className="prose prose-lg max-w-none mb-8">
                   <div
-                    className="text-gray-800 leading-relaxed whitespace-pre-wrap"
-                  >
-                    {formData.content || 'Resource content will appear here...'}
-                  </div>
+                    className="text-gray-800 leading-relaxed"
+                    dangerouslySetInnerHTML={{
+                      __html: formData.content || '<p class="text-gray-500 italic">Resource content will appear here...</p>'
+                    }}
+                  />
                 </div>
 
                 {/* Tags */}

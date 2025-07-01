@@ -475,14 +475,23 @@ router.delete('/posts/:id', async (req, res) => {
   }
 });
 
-// Get single resource post
-router.get('/posts/:id', async (req, res) => {
+// Get single resource post (by ID or slug)
+router.get('/posts/:identifier', async (req, res) => {
   try {
-    const { id } = req.params;
+    const { identifier } = req.params;
 
-    // Check database first
+    // Check database first - try by slug, then by ID
     try {
-      const dbPost = await Resource.findById(id);
+      let dbPost = null;
+
+      // First try to find by slug
+      dbPost = await Resource.findOne({ 'seo.slug': identifier, status: 'published' });
+
+      // If not found by slug, try by ID (for backward compatibility)
+      if (!dbPost) {
+        dbPost = await Resource.findById(identifier);
+      }
+
       if (dbPost) {
         const responsePost = {
           id: dbPost._id.toString(),
@@ -507,7 +516,7 @@ router.get('/posts/:id', async (req, res) => {
         return res.json(responsePost);
       }
     } catch (dbError) {
-      console.log('Database lookup failed for ID:', id, dbError.message);
+      console.log('Database lookup failed for identifier:', identifier, dbError.message);
     }
 
     // Check LinkedIn posts as fallback

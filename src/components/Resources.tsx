@@ -66,8 +66,10 @@ const Resources = () => {
     }
   };
 
-  const handleReadMore = (postId: string) => {
-    navigate(`/resources/${postId}`);
+  const handleReadMore = (post: any) => {
+    // Use slug if available, otherwise fall back to ID
+    const identifier = post.slug || post.seoSlug || post.id;
+    navigate(`/resources/${identifier}`);
   };
 
   const filteredPosts = resourceData?.posts.filter(post => 
@@ -218,7 +220,7 @@ const Resources = () => {
 
                 <div className="flex items-center justify-between">
                   <button
-                    onClick={() => handleReadMore(post.id)}
+                    onClick={() => handleReadMore(post)}
                     className="flex items-center bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition duration-300 font-medium"
                   >
                     Read More

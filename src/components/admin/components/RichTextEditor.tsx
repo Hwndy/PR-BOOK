@@ -1,4 +1,4 @@
-import React, { useRef, useMemo } from 'react';
+import React, { useRef, useMemo, useEffect } from 'react';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import './RichTextEditor.css';
@@ -178,6 +178,53 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
     'link', 'image', 'video',
     'clean'
   ];
+
+  // Add tooltips to toolbar after component mounts
+  useEffect(() => {
+    const addTooltips = () => {
+      const toolbar = document.querySelector('.rich-text-editor .ql-toolbar');
+      if (toolbar) {
+        // Add tooltips to buttons
+        const tooltips = {
+          '.ql-bold': 'Bold (Ctrl+B)',
+          '.ql-italic': 'Italic (Ctrl+I)',
+          '.ql-underline': 'Underline (Ctrl+U)',
+          '.ql-strike': 'Strikethrough',
+          '.ql-script[value="super"]': 'Superscript',
+          '.ql-script[value="sub"]': 'Subscript',
+          '.ql-header': 'Heading',
+          '.ql-font': 'Font Family',
+          '.ql-size': 'Font Size',
+          '.ql-color': 'Text Color',
+          '.ql-background': 'Background Color',
+          '.ql-align': 'Text Alignment',
+          '.ql-indent[value="-1"]': 'Decrease Indent',
+          '.ql-indent[value="+1"]': 'Increase Indent',
+          '.ql-direction': 'Text Direction',
+          '.ql-list[value="ordered"]': 'Numbered List',
+          '.ql-list[value="bullet"]': 'Bullet List',
+          '.ql-list[value="check"]': 'Checklist',
+          '.ql-blockquote': 'Blockquote',
+          '.ql-code-block': 'Code Block',
+          '.ql-link': 'Insert Link',
+          '.ql-image': 'Insert Image',
+          '.ql-video': 'Insert Video',
+          '.ql-clean': 'Clear Formatting'
+        };
+
+        Object.entries(tooltips).forEach(([selector, title]) => {
+          const element = toolbar.querySelector(selector);
+          if (element) {
+            element.setAttribute('title', title);
+          }
+        });
+      }
+    };
+
+    // Add tooltips after a short delay to ensure toolbar is rendered
+    const timer = setTimeout(addTooltips, 100);
+    return () => clearTimeout(timer);
+  }, []);
 
   return (
     <div className="rich-text-editor">

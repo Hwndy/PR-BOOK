@@ -1,5 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { HelmetProvider } from 'react-helmet-async';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import Services from './components/Services';
@@ -26,8 +27,9 @@ import './index.css';
 
 const App = () => {
   return (
-    <AdminProvider>
-      <Router>
+    <HelmetProvider>
+      <AdminProvider>
+        <Router>
         <Routes>
           {/* Admin Routes - No Navbar/Footer */}
           <Route path="/admin/login" element={<AdminLogin />} />
@@ -71,6 +73,7 @@ const App = () => {
         </Routes>
       </Router>
     </AdminProvider>
+    </HelmetProvider>
   );
 };
 
