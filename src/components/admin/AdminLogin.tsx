@@ -23,9 +23,9 @@ const AdminLogin: React.FC = () => {
     setIsLoading(true);
 
     try {
-      const success = login(username, password);
-      if (!success) {
-        setError('Invalid username or password');
+      const result = await login(username, password);
+      if (!result.success) {
+        setError(result.message);
       }
     } catch (err) {
       setError('Login failed. Please try again.');

@@ -8,6 +8,7 @@ const nodemailer = require('nodemailer');
 const crypto = require('crypto');
 const path = require('path');
 const adminRoutes = require('./routes/admin');
+const authRoutes = require('./routes/auth');
 const podcastRoutes = require('./routes/podcast');
 const resourceRoutes = require('./routes/resources');
 const ebookRoutes = require('./routes/ebook');
@@ -42,6 +43,7 @@ app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Routes
+app.use('/api/auth', authRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/podcast', podcastRoutes);
 app.use('/api/resources', resourceRoutes);
@@ -58,9 +60,17 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb+srv://suleayo04:sulaimon@pr
   useUnifiedTopology: true,
   serverSelectionTimeoutMS: 5000, // Timeout after 5s instead of 30s
 })
-.then(() => {
+.then(async () => {
   console.log('Connected to MongoDB');
   isMongoConnected = true;
+
+  // Initialize default admin user
+  try {
+    const AdminUser = require('./models/AdminUser');
+    await AdminUser.createDefaultAdmin();
+  } catch (error) {
+    console.error('Error initializing admin user:', error);
+  }
 })
 .catch(err => {
   console.error('MongoDB connection error:', err);
