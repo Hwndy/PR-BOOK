@@ -23,6 +23,8 @@ import {
   FileImage
 } from 'lucide-react';
 import { apiClient } from '../../../utils/api';
+import RichTextEditor from './RichTextEditor';
+import EditorToolbarGuide from './EditorToolbarGuide';
 
 interface ResourcePost {
   id: string;
@@ -582,16 +584,17 @@ const ResourceManagement: React.FC = () => {
 
               {/* Content */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Content *
-                </label>
-                <textarea
+                <div className="flex items-center justify-between mb-2">
+                  <label className="block text-sm font-medium text-gray-700">
+                    Content *
+                  </label>
+                  <EditorToolbarGuide />
+                </div>
+                <RichTextEditor
                   value={formData.content}
-                  onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-                  rows={12}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="Write your resource content here..."
-                  required
+                  onChange={(content) => setFormData({ ...formData, content })}
+                  placeholder="Write your resource content here... Use the toolbar above to format text, add images, links, and more."
+                  height="400px"
                 />
               </div>
 

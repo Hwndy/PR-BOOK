@@ -560,4 +560,31 @@ router.post('/upload-image', upload.single('image'), (req, res) => {
   }
 });
 
+// Upload inline image endpoint (for rich text editor)
+router.post('/upload-inline-image', upload.single('image'), (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: 'No image file provided' });
+    }
+
+    // Generate full URL for production
+    const baseUrl = process.env.PUBLIC_URL || process.env.BACKEND_URL || 'https://pr-book.onrender.com';
+    const imageUrl = `${baseUrl}/uploads/resources/${req.file.filename}`;
+    console.log('Inline image upload - generated image URL:', imageUrl);
+
+    res.json({
+      success: true,
+      message: 'Inline image uploaded successfully',
+      imageUrl: imageUrl,
+      url: imageUrl // Alternative key for compatibility
+    });
+  } catch (error) {
+    console.error('Error uploading inline image:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to upload inline image'
+    });
+  }
+});
+
 module.exports = router;
