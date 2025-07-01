@@ -4,6 +4,7 @@ const crypto = require('crypto');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const Resource = require('../models/Resource');
 const router = express.Router();
 
 // Configure multer for image uploads
@@ -37,9 +38,7 @@ const upload = multer({
   }
 });
 
-// In-memory storage for manual resource posts (use database in production)
-let manualResourcePosts = [];
-let nextPostId = 1;
+// Database storage is now used for resource posts
 
 // LinkedIn configuration
 const LINKEDIN_ACCESS_TOKEN = process.env.LINKEDIN_ACCESS_TOKEN;
@@ -139,29 +138,66 @@ const getLinkedInPosts = async () => {
 // Get resource posts endpoint
 router.get('/posts', async (req, res) => {
   try {
-    const linkedinPosts = await getLinkedInPosts();
-    
-    // Format LinkedIn posts to match our interface
-    const formattedLinkedInPosts = linkedinPosts.map(post => ({
-      id: post.id,
+    console.log('Fetching resource posts from database...');
+
+    // Get manual posts from database
+    const dbPosts = await Resource.getPublished();
+    console.log('Database posts fetched:', dbPosts.length);
+
+    // Convert database posts to the expected format
+    const manualPosts = dbPosts.map(post => ({
+      id: post._id.toString(),
       title: post.title,
-      excerpt: post.content.length > 150 ? post.content.substring(0, 147) + '...' : post.content,
+      excerpt: post.excerpt,
       content: post.content,
       category: post.category,
-      date: new Date(post.publishedAt).toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-      }),
-      publishedAt: post.publishedAt,
-      linkedinUrl: post.linkedinUrl,
-      image: post.image || `https://images.pexels.com/photos/${Math.floor(Math.random() * 1000000)}/pexels-photo-${Math.floor(Math.random() * 1000000)}.jpeg`,
+      image: post.image,
+      tags: post.tags,
+      author: post.author,
+      date: post.formattedDate,
+      readTime: post.readTime,
       engagement: post.engagement,
-      isManual: false
+      status: post.status,
+      linkedinUrl: post.linkedinUrl || 'https://www.linkedin.com/in/philipodiakose/',
+      publishedAt: post.publishedAt,
+      isManual: true,
+      seoTitle: post.seo.title,
+      seoDescription: post.seo.description,
+      slug: post.seo.slug
     }));
 
+    // Get LinkedIn posts
+    let formattedLinkedInPosts = [];
+    try {
+      const linkedinPosts = await getLinkedInPosts();
+
+      // Format LinkedIn posts to match our interface
+      formattedLinkedInPosts = linkedinPosts.map(post => ({
+        id: post.id,
+        title: post.title,
+        excerpt: post.content.length > 150 ? post.content.substring(0, 147) + '...' : post.content,
+        content: post.content,
+        category: post.category,
+        date: new Date(post.publishedAt).toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric'
+        }),
+        publishedAt: post.publishedAt,
+        linkedinUrl: post.linkedinUrl,
+        image: post.image || `https://images.pexels.com/photos/${Math.floor(Math.random() * 1000000)}/pexels-photo-${Math.floor(Math.random() * 1000000)}.jpeg`,
+        engagement: post.engagement,
+        isManual: false
+      }));
+
+      console.log('LinkedIn posts fetched:', formattedLinkedInPosts.length);
+    } catch (linkedinError) {
+      console.log('LinkedIn fetch failed:', linkedinError.message);
+    }
+
     // Combine manual posts with LinkedIn posts (manual posts first)
-    const allPosts = [...manualResourcePosts, ...formattedLinkedInPosts];
+    const allPosts = [...manualPosts, ...formattedLinkedInPosts];
+    console.log('Total posts (database + LinkedIn):', allPosts.length);
 
     res.json({
       posts: allPosts,
@@ -173,7 +209,7 @@ router.get('/posts', async (req, res) => {
       },
       meta: {
         totalPosts: allPosts.length,
-        manualPosts: manualResourcePosts.length,
+        manualPosts: manualPosts.length,
         linkedinPosts: formattedLinkedInPosts.length,
         lastUpdated: new Date().toISOString(),
         linkedinConnected: !!LINKEDIN_ACCESS_TOKEN
@@ -184,7 +220,14 @@ router.get('/posts', async (req, res) => {
     console.error('Error in resource posts endpoint:', error);
     res.status(500).json({
       error: 'Failed to fetch resource posts',
-      posts: [...manualResourcePosts] // Only return manual posts on error
+      posts: [], // Return empty array on database error
+      meta: {
+        totalPosts: 0,
+        manualPosts: 0,
+        linkedinPosts: 0,
+        lastUpdated: new Date().toISOString(),
+        linkedinConnected: !!LINKEDIN_ACCESS_TOKEN
+      }
     });
   }
 });
@@ -241,8 +284,8 @@ router.post('/posts', upload.single('image'), async (req, res) => {
       console.log('Generated image URL:', image);
     }
 
-    const newPost = {
-      id: generateId(),
+    // Create new resource in database
+    const newResource = new Resource({
       title: title.trim(),
       excerpt: excerpt?.trim() || content.substring(0, 150) + '...',
       content: content.trim(),
@@ -251,33 +294,46 @@ router.post('/posts', upload.single('image'), async (req, res) => {
       tags: tags ? tags.split(',').map(tag => tag.trim()).filter(tag => tag) : [],
       author: author || 'Philip Odiakose',
       status: status || 'published',
-      date: new Date().toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-      }),
-      publishedAt: new Date().toISOString(),
-      linkedinUrl: 'https://www.linkedin.com/in/philipodiakose/',
-      engagement: {
-        likes: 0,
-        comments: 0,
-        shares: 0
-      },
-      isManual: true,
       readTime: readTime ? parseInt(readTime) : Math.ceil(content.split(/\s+/).length / 200),
-      seoTitle: (seoTitle && seoTitle.trim()) || title.trim(),
-      seoDescription: (seoDescription && seoDescription.trim()) || (excerpt && excerpt.trim()) || content.substring(0, 160) + '...',
-      slug: (slug && slug.trim()) || title.toLowerCase().replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-').trim()
+      seo: {
+        title: (seoTitle && seoTitle.trim()) || title.trim(),
+        description: (seoDescription && seoDescription.trim()) || (excerpt && excerpt.trim()) || content.substring(0, 160) + '...',
+        slug: (slug && slug.trim()) || title.toLowerCase().replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-').trim()
+      },
+      source: 'manual',
+      linkedinUrl: 'https://www.linkedin.com/in/philipodiakose/'
+    });
+
+    // Save to database
+    const savedResource = await newResource.save();
+    console.log('Created new resource in database with ID:', savedResource._id);
+    console.log('Image URL:', savedResource.image);
+
+    // Format response to match frontend expectations
+    const responsePost = {
+      id: savedResource._id.toString(),
+      title: savedResource.title,
+      excerpt: savedResource.excerpt,
+      content: savedResource.content,
+      category: savedResource.category,
+      image: savedResource.image,
+      tags: savedResource.tags,
+      author: savedResource.author,
+      date: savedResource.formattedDate,
+      readTime: savedResource.readTime,
+      engagement: savedResource.engagement,
+      status: savedResource.status,
+      linkedinUrl: savedResource.linkedinUrl,
+      publishedAt: savedResource.publishedAt,
+      isManual: true,
+      seoTitle: savedResource.seo.title,
+      seoDescription: savedResource.seo.description,
+      slug: savedResource.seo.slug
     };
-
-    manualResourcePosts.unshift(newPost); // Add to beginning of array
-
-    console.log('Created new resource post with image URL:', newPost.image);
-    console.log('Total manual posts:', manualResourcePosts.length);
 
     res.status(201).json({
       message: 'Resource post created successfully',
-      post: newPost
+      post: responsePost
     });
 
   } catch (error) {
@@ -393,26 +449,54 @@ router.get('/posts/:id', async (req, res) => {
   try {
     const { id } = req.params;
 
-    // Check manual posts first
-    const manualPost = manualResourcePosts.find(post => post.id === id);
-    if (manualPost) {
-      return res.json(manualPost);
+    // Check database first
+    try {
+      const dbPost = await Resource.findById(id);
+      if (dbPost) {
+        const responsePost = {
+          id: dbPost._id.toString(),
+          title: dbPost.title,
+          excerpt: dbPost.excerpt,
+          content: dbPost.content,
+          category: dbPost.category,
+          image: dbPost.image,
+          tags: dbPost.tags,
+          author: dbPost.author,
+          date: dbPost.formattedDate,
+          readTime: dbPost.readTime,
+          engagement: dbPost.engagement,
+          status: dbPost.status,
+          linkedinUrl: dbPost.linkedinUrl,
+          publishedAt: dbPost.publishedAt,
+          isManual: true,
+          seoTitle: dbPost.seo.title,
+          seoDescription: dbPost.seo.description,
+          slug: dbPost.seo.slug
+        };
+        return res.json(responsePost);
+      }
+    } catch (dbError) {
+      console.log('Database lookup failed for ID:', id, dbError.message);
     }
 
-    // Check LinkedIn posts
-    const linkedinPosts = await getLinkedInPosts();
-    const linkedinPost = linkedinPosts.find(post => post.id === id);
+    // Check LinkedIn posts as fallback
+    try {
+      const linkedinPosts = await getLinkedInPosts();
+      const linkedinPost = linkedinPosts.find(post => post.id === id);
 
-    if (linkedinPost) {
-      return res.json({
-        ...linkedinPost,
-        excerpt: linkedinPost.content.length > 150 ? linkedinPost.content.substring(0, 147) + '...' : linkedinPost.content,
-        date: new Date(linkedinPost.publishedAt).toLocaleDateString('en-US', {
-          year: 'numeric',
-          month: 'long',
-          day: 'numeric'
-        })
-      });
+      if (linkedinPost) {
+        return res.json({
+          ...linkedinPost,
+          excerpt: linkedinPost.content.length > 150 ? linkedinPost.content.substring(0, 147) + '...' : linkedinPost.content,
+          date: new Date(linkedinPost.publishedAt).toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+          })
+        });
+      }
+    } catch (linkedinError) {
+      console.log('LinkedIn lookup failed:', linkedinError.message);
     }
 
     res.status(404).json({ error: 'Resource post not found' });
