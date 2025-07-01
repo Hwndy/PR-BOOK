@@ -125,11 +125,7 @@ const AdminLogin: React.FC = () => {
             </button>
           </div>
 
-          <div className="text-center">
-            <p className="text-xs text-gray-500">
-              For demo purposes: admin / PRAdmin2024!@#
-            </p>
-          </div>
+
         </form>
       </div>
     </div>

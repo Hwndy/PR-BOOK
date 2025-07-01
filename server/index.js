@@ -24,8 +24,10 @@ app.use(cors({
   origin: [
     'http://localhost:5173', // Vite dev server
     'http://localhost:3000', // Alternative dev server
-    'https://thescienceofpublicrelations.vercel.app', // Production frontend
-    'https://api.thescienceofpublicrelations.com' // Production API
+    'https://www.thescienceofpublicrelations.com', // Production frontend
+    'https://thescienceofpublicrelations.vercel.app', // Vercel frontend (backup)
+    'https://pr-book.onrender.com', // Production API
+    'https://api.thescienceofpublicrelations.com' // Legacy API domain
   ],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
@@ -133,7 +135,7 @@ const generateReadingURL = async (order) => {
     }
 
     const axios = require('axios');
-    const response = await axios.post('http://localhost:5000/api/ebook/generate-reading-url', {
+    const response = await axios.post('https://pr-book.onrender.com/api/ebook/generate-reading-url', {
       email: order.email,
       orderReference: order.reference,
       productName: order.productName
@@ -703,8 +705,7 @@ app.get('/payment-success', (req, res) => {
   console.log('Payment callback received:', { reference, trxref, amount });
 
   // Redirect to the client-side payment success page with all parameters
-  // The Vite development server is running on port 5173
-  const redirectUrl = new URL('https://thescienceofpublicrelations.vercel.app/payment-success');
+  const redirectUrl = new URL('https://www.thescienceofpublicrelations.com/payment-success');
   redirectUrl.searchParams.append('reference', reference || trxref);
 
   // Include amount if available
@@ -718,7 +719,7 @@ app.get('/payment-success', (req, res) => {
 // E-book reading route handler
 app.get('/read-book/:token', (req, res) => {
   // Redirect to the frontend e-book reader
-  const redirectUrl = `https://thescienceofpublicrelations.vercel.app/read-book/${req.params.token}`;
+  const redirectUrl = `https://www.thescienceofpublicrelations.com/read-book/${req.params.token}`;
   res.redirect(redirectUrl);
 });
 

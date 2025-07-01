@@ -9,10 +9,10 @@ interface AdminContextType {
 
 const AdminContext = createContext<AdminContextType | undefined>(undefined);
 
-// Embedded admin credentials (in production, this should be more secure)
+// Admin credentials from environment variables (more secure)
 const ADMIN_CREDENTIALS = {
-  username: 'admin',
-  password: 'PRAdmin2024!@#'
+  username: import.meta.env.VITE_ADMIN_USERNAME || 'admin',
+  password: import.meta.env.VITE_ADMIN_PASSWORD || 'admin123'
 };
 
 interface AdminProviderProps {

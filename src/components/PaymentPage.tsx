@@ -407,7 +407,7 @@ const PaymentPage: React.FC<PaymentPageProps> = () => {
                     console.log('Sending to server:', { email, amount, productName });
 
                     // Initialize payment on the server first
-                    const initResponse = await fetch('https://pr-book.onrender.com/api/initialize-payment', {
+                    const initResponse = await fetch(`${import.meta.env.VITE_API_URL}/api/initialize-payment`, {
                       method: 'POST',
                       headers: {
                         'Content-Type': 'application/json',
