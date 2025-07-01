@@ -6,9 +6,10 @@ const dotenv = require('dotenv');
 const mongoose = require('mongoose');
 const nodemailer = require('nodemailer');
 const crypto = require('crypto');
+const path = require('path');
 const adminRoutes = require('./routes/admin');
 const podcastRoutes = require('./routes/podcast');
-const blogRoutes = require('./routes/blog');
+const resourceRoutes = require('./routes/resources');
 const ebookRoutes = require('./routes/ebook');
 
 // Load environment variables
@@ -19,13 +20,29 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: [
+    'http://localhost:5173', // Vite dev server
+    'http://localhost:3000', // Alternative dev server
+    'https://thescienceofpublicrelations.vercel.app', // Production frontend
+    'https://api.thescienceofpublicrelations.com' // Production API
+  ],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'x-paystack-signature']
+}));
 app.use(bodyParser.json());
+
+// Serve static files from uploads directory
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+
+// Static file serving for uploads
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Routes
 app.use('/api/admin', adminRoutes);
 app.use('/api/podcast', podcastRoutes);
-app.use('/api/blog', blogRoutes);
+app.use('/api/resources', resourceRoutes);
 app.use('/api/ebook', ebookRoutes);
 
 // Paystack secret key from environment variables

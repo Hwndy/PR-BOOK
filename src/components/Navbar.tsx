@@ -39,7 +39,7 @@ const Navbar = () => {
     { path: '/podcast', label: 'Podcast' },
     { path: '/book', label: 'Book' },
     { path: '/speaking', label: 'Speaking' },
-    { path: '/blog', label: 'Blog' },
+    { path: '/resources', label: 'Resources' },
     { path: '/contact', label: 'Contact' },
   ];
 

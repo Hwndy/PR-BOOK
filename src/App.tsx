@@ -5,7 +5,8 @@ import Hero from './components/Hero';
 import Services from './components/Services';
 // import CaseStudies from './components/CaseStudies';
 import About from './components/About';
-import Blog from './components/Blog';
+import Resources from './components/Resources';
+import ResourcePost from './components/ResourcePost';
 import Contact from './components/Contact';
 import Footer from './components/Footer';
 import Book from './components/Book';
@@ -59,7 +60,8 @@ const App = () => {
                 <Route path="/payment" element={<PaymentPage />} />
                 <Route path="/payment-success" element={<PaymentSuccess />} />
                 <Route path="/speaking" element={<Speaking />} />
-                <Route path="/blog" element={<Blog />} />
+                <Route path="/resources" element={<Resources />} />
+                <Route path="/resources/:id" element={<ResourcePost />} />
                 <Route path="/contact" element={<Contact />} />
               </Routes>
               <Footer />

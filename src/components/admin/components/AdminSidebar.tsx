@@ -29,7 +29,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ isOpen, onClose }) => {
     { name: 'Orders', href: '/admin/orders', icon: ShoppingCart },
     { name: 'Customers', href: '/admin/customers', icon: Users },
     { name: 'Content', href: '/admin/content', icon: FileText },
-    { name: 'Blog', href: '/admin/blog', icon: BookOpen },
+    { name: 'Resources', href: '/admin/resources', icon: BookOpen },
     { name: 'E-book', href: '/admin/ebook', icon: Lock },
     { name: 'Podcast', href: '/admin/podcast', icon: Podcast },
     { name: 'Analytics', href: '/admin/analytics', icon: BarChart3 },

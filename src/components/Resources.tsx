@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, ExternalLink, Loader, RefreshCw, Heart, MessageCircle, Share2 } from 'lucide-react';
+import { ArrowRight, ExternalLink, Loader, RefreshCw, Heart, MessageCircle, Share2, Filter } from 'lucide-react';
 
-interface BlogPost {
+interface ResourcePost {
   id: string;
   title: string;
   excerpt: string;
@@ -19,8 +19,8 @@ interface BlogPost {
   };
 }
 
-interface BlogData {
-  posts: BlogPost[];
+interface ResourceData {
+  posts: ResourcePost[];
   profile: {
     name: string;
     title: string;
@@ -36,15 +36,18 @@ interface BlogData {
 
 const Resources = () => {
   const navigate = useNavigate();
-  const [blogData, setBlogData] = useState<BlogData | null>(null);
+  const [resourceData, setResourceData] = useState<ResourceData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<string>('All');
+
+  const categories = ['All', 'PR Measurement', 'Digital PR', 'Strategy', 'Industry Trends', 'Case Studies', 'Analytics', 'Insights'];
 
   useEffect(() => {
-    fetchBlogData();
+    fetchResourceData();
   }, []);
 
-  const fetchBlogData = async () => {
+  const fetchResourceData = async () => {
     try {
       setLoading(true);
       setError(null);
@@ -54,9 +57,9 @@ const Resources = () => {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       const data = await response.json();
-      setBlogData(data);
+      setResourceData(data);
     } catch (err) {
-      console.error('Error in fetchBlogData:', err);
+      console.error('Error in fetchResourceData:', err);
       setError('Failed to load resources.');
     } finally {
       setLoading(false);
@@ -67,9 +70,13 @@ const Resources = () => {
     navigate(`/resources/${postId}`);
   };
 
+  const filteredPosts = resourceData?.posts.filter(post => 
+    selectedCategory === 'All' || post.category === selectedCategory
+  ) || [];
+
   if (loading) {
     return (
-      <section id="blog" className="py-20 bg-white">
+      <section id="resources" className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-center min-h-[400px]">
             <div className="text-center">
@@ -82,7 +89,7 @@ const Resources = () => {
     );
   }
 
-  if (error || !blogData) {
+  if (error || !resourceData) {
     return (
       <section id="resources" className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -92,7 +99,7 @@ const Resources = () => {
             </h2>
             <p className="text-red-600 mb-4">{error}</p>
             <button
-              onClick={fetchBlogData}
+              onClick={fetchResourceData}
               className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
             >
               Try Again
@@ -110,15 +117,38 @@ const Resources = () => {
           <h2 className="text-3xl font-bold text-gray-900 sm:text-4xl mb-4">
             PR Resources & Insights
           </h2>
-          <p className="max-w-2xl mx-auto text-lg text-gray-600 mb-4">
+          <p className="max-w-2xl mx-auto text-lg text-gray-600 mb-8">
             Latest trends, methodologies, case studies and best practices in PR monitoring, measurement and evaluation
           </p>
+          
+          {/* Category Filter */}
+          <div className="flex items-center justify-center mb-8">
+            <div className="flex items-center space-x-2 bg-gray-100 rounded-lg p-1">
+              <Filter className="h-4 w-4 text-gray-500 ml-2" />
+              <div className="flex flex-wrap gap-1">
+                {categories.map((category) => (
+                  <button
+                    key={category}
+                    onClick={() => setSelectedCategory(category)}
+                    className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
+                      selectedCategory === category
+                        ? 'bg-blue-600 text-white'
+                        : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50'
+                    }`}
+                  >
+                    {category}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
           <div className="flex items-center justify-center space-x-4 flex-wrap gap-2">
             <span className="text-sm text-gray-500">
-              {blogData.meta.totalPosts} articles from LinkedIn
+              {filteredPosts.length} of {resourceData.meta.totalPosts} resources
             </span>
             <a
-              href={blogData.profile.linkedinUrl}
+              href={resourceData.profile.linkedinUrl}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center text-blue-600 hover:text-blue-700 transition-colors"
@@ -127,7 +157,7 @@ const Resources = () => {
               <ExternalLink className="h-3 w-3 ml-1" />
             </a>
             <button
-              onClick={fetchBlogData}
+              onClick={fetchResourceData}
               disabled={loading}
               className="inline-flex items-center text-gray-600 hover:text-gray-700 transition-colors disabled:opacity-50"
             >
@@ -138,7 +168,7 @@ const Resources = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {blogData.posts.map((post) => (
+          {filteredPosts.map((post) => (
             <div
               key={post.id}
               className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 group"
@@ -205,10 +235,22 @@ const Resources = () => {
           ))}
         </div>
 
+        {filteredPosts.length === 0 && selectedCategory !== 'All' && (
+          <div className="text-center py-12">
+            <p className="text-gray-500 text-lg">No resources found in the "{selectedCategory}" category.</p>
+            <button
+              onClick={() => setSelectedCategory('All')}
+              className="mt-4 text-blue-600 hover:text-blue-700 font-medium"
+            >
+              View all resources
+            </button>
+          </div>
+        )}
+
         <div className="mt-12 text-center">
           <div className="flex items-center justify-center space-x-4 flex-wrap gap-4">
             <a
-              href={blogData.profile.linkedinUrl}
+              href={resourceData.profile.linkedinUrl}
               target="_blank"
               rel="noopener noreferrer"
               className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-8 rounded-md transition duration-300 inline-flex items-center"
@@ -217,7 +259,7 @@ const Resources = () => {
               <ExternalLink className="ml-2 h-4 w-4" />
             </a>
             <button
-              onClick={fetchBlogData}
+              onClick={fetchResourceData}
               disabled={loading}
               className="bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium py-3 px-8 rounded-md transition duration-300 disabled:opacity-50 inline-flex items-center"
             >
@@ -226,7 +268,7 @@ const Resources = () => {
             </button>
           </div>
 
-          {!blogData.meta.linkedinConnected && (
+          {!resourceData.meta.linkedinConnected && (
             <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg max-w-2xl mx-auto">
               <p className="text-sm text-blue-700">
                 <strong>Note:</strong> Currently showing curated content. Connect LinkedIn API for real-time posts from Philip's profile.

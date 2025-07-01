@@ -8,7 +8,7 @@ import CustomersManagement from './components/CustomersManagement';
 import ContentManagement from './components/ContentManagement';
 import Analytics from './components/Analytics';
 import PodcastManagement from './components/PodcastManagement';
-import BlogManagement from './components/BlogManagement';
+import ResourceManagement from './components/ResourceManagement';
 import EbookManagement from './components/EbookManagement';
 
 const AdminDashboard: React.FC = () => {
@@ -32,7 +32,7 @@ const AdminDashboard: React.FC = () => {
               <Route path="/orders" element={<OrdersManagement />} />
               <Route path="/customers" element={<CustomersManagement />} />
               <Route path="/content" element={<ContentManagement />} />
-              <Route path="/blog" element={<BlogManagement />} />
+              <Route path="/resources" element={<ResourceManagement />} />
               <Route path="/ebook" element={<EbookManagement />} />
               <Route path="/podcast" element={<PodcastManagement />} />
               <Route path="/analytics" element={<Analytics />} />

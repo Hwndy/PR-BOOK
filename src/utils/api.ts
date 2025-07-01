@@ -91,6 +91,80 @@ class ApiClient {
     });
   }
 
+  // Resource management endpoints
+  async getResourcePosts() {
+    return this.request('/api/resources/posts');
+  }
+
+  async getResourcePost(postId: string) {
+    return this.request(`/api/resources/posts/${postId}`);
+  }
+
+  async createResourcePost(post: {
+    title: string;
+    excerpt: string;
+    content: string;
+    category: string;
+    image?: string;
+    imageUrl?: string;
+    tags?: string;
+    author?: string;
+    status?: string;
+    readTime?: string;
+    seoTitle?: string;
+    seoDescription?: string;
+    slug?: string;
+  }) {
+    return this.request('/api/resources/posts', {
+      method: 'POST',
+      body: JSON.stringify(post)
+    });
+  }
+
+  async updateResourcePost(postId: string, post: {
+    title?: string;
+    excerpt?: string;
+    content?: string;
+    category?: string;
+    image?: string;
+    imageUrl?: string;
+    tags?: string;
+    author?: string;
+    status?: string;
+    readTime?: string;
+    seoTitle?: string;
+    seoDescription?: string;
+    slug?: string;
+  }) {
+    return this.request(`/api/resources/posts/${postId}`, {
+      method: 'PUT',
+      body: JSON.stringify(post)
+    });
+  }
+
+  async deleteResourcePost(postId: string) {
+    return this.request(`/api/resources/posts/${postId}`, {
+      method: 'DELETE'
+    });
+  }
+
+  async uploadResourceImage(formData: FormData) {
+    const token = localStorage.getItem('adminToken');
+    const response = await fetch(`${this.baseURL}/api/resources/upload-image`, {
+      method: 'POST',
+      headers: {
+        ...(token && { Authorization: `Bearer ${token}` })
+      },
+      body: formData
+    });
+
+    if (!response.ok) {
+      throw new Error('Image upload failed');
+    }
+
+    return response.json();
+  }
+
   async exportOrders() {
     const token = localStorage.getItem('adminToken');
     const response = await fetch(`${this.baseURL}/api/admin/orders/export`, {
