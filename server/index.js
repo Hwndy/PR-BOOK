@@ -64,13 +64,16 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb+srv://suleayo04:sulaimon@pr
   console.log('Connected to MongoDB');
   isMongoConnected = true;
 
-  // Initialize default admin user
-  try {
-    const AdminUser = require('./models/AdminUser');
-    await AdminUser.createDefaultAdmin();
-  } catch (error) {
-    console.error('Error initializing admin user:', error);
-  }
+  // Initialize default admin user (non-blocking)
+  setTimeout(async () => {
+    try {
+      const AdminUser = require('./models/AdminUser');
+      await AdminUser.createDefaultAdmin();
+      console.log('Admin user initialization completed');
+    } catch (error) {
+      console.log('Admin user initialization skipped:', error.message);
+    }
+  }, 1000);
 })
 .catch(err => {
   console.error('MongoDB connection error:', err);

