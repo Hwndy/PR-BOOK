@@ -74,8 +74,7 @@ const Contact = () => {
                   <div className="ml-3 sm:ml-4">
                     {/* <p className="text-white font-medium text-sm sm:text-base">Visit Us</p> */}
                     <p className="text-white-100 text-sm sm:text-base">
-                      OLUFEMI STREET<br />
-                      SURULERE, LAGOS
+                  LAGOS
                     </p>
                   </div>
                 </div>

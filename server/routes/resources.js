@@ -361,21 +361,21 @@ router.put('/posts/:id', upload.single('image'), async (req, res) => {
       slug
     } = req.body;
 
-    const postIndex = manualResourcePosts.findIndex(post => post.id === id);
-    if (postIndex === -1) {
+    // Find the resource in database
+    const existingResource = await Resource.findById(id);
+    if (!existingResource) {
       return res.status(404).json({ error: 'Resource post not found' });
     }
 
-    const existingPost = manualResourcePosts[postIndex];
-
     // Handle image - either uploaded file or URL
-    let image = imageUrl || existingPost.image;
+    let image = imageUrl || existingResource.image;
     if (req.file) {
-      // Delete old image if it exists
-      if (existingPost.image && (existingPost.image.includes('/uploads/') || existingPost.image.startsWith('/uploads/'))) {
-        const oldImagePath = path.join(__dirname, '../uploads/resources', path.basename(existingPost.image));
+      // Delete old image if it exists and is a local upload
+      if (existingResource.image && existingResource.image.includes('/uploads/')) {
+        const oldImagePath = path.join(__dirname, '../uploads/resources', path.basename(existingResource.image));
         if (fs.existsSync(oldImagePath)) {
           fs.unlinkSync(oldImagePath);
+          console.log('Deleted old image:', oldImagePath);
         }
       }
       // Generate full URL for production
@@ -384,28 +384,54 @@ router.put('/posts/:id', upload.single('image'), async (req, res) => {
       console.log('Updated image URL:', image);
     }
 
-    const updatedPost = {
-      ...existingPost,
-      title: (title && title.trim()) || existingPost.title,
-      excerpt: (excerpt && excerpt.trim()) || existingPost.excerpt,
-      content: (content && content.trim()) || existingPost.content,
-      category: category || existingPost.category,
+    // Update the resource
+    const updateData = {
+      title: (title && title.trim()) || existingResource.title,
+      excerpt: (excerpt && excerpt.trim()) || existingResource.excerpt,
+      content: (content && content.trim()) || existingResource.content,
+      category: category || existingResource.category,
       image: image,
-      tags: tags ? tags.split(',').map(tag => tag.trim()).filter(tag => tag) : existingPost.tags,
-      author: author || existingPost.author,
-      status: status || existingPost.status,
-      readTime: readTime ? parseInt(readTime) : existingPost.readTime,
-      seoTitle: (seoTitle && seoTitle.trim()) || existingPost.seoTitle,
-      seoDescription: (seoDescription && seoDescription.trim()) || existingPost.seoDescription,
-      slug: (slug && slug.trim()) || existingPost.slug,
-      updatedAt: new Date().toISOString()
+      tags: tags ? tags.split(',').map(tag => tag.trim()).filter(tag => tag) : existingResource.tags,
+      author: author || existingResource.author,
+      status: status || existingResource.status,
+      readTime: readTime ? parseInt(readTime) : existingResource.readTime,
+      'seo.title': (seoTitle && seoTitle.trim()) || existingResource.seo.title,
+      'seo.description': (seoDescription && seoDescription.trim()) || existingResource.seo.description,
+      'seo.slug': (slug && slug.trim()) || existingResource.seo.slug
     };
 
-    manualResourcePosts[postIndex] = updatedPost;
+    const updatedResource = await Resource.findByIdAndUpdate(id, updateData, {
+      new: true,
+      runValidators: true
+    });
+
+    console.log('Updated resource in database with ID:', updatedResource._id);
+
+    // Format response to match frontend expectations
+    const responsePost = {
+      id: updatedResource._id.toString(),
+      title: updatedResource.title,
+      excerpt: updatedResource.excerpt,
+      content: updatedResource.content,
+      category: updatedResource.category,
+      image: updatedResource.image,
+      tags: updatedResource.tags,
+      author: updatedResource.author,
+      date: updatedResource.formattedDate,
+      readTime: updatedResource.readTime,
+      engagement: updatedResource.engagement,
+      status: updatedResource.status,
+      linkedinUrl: updatedResource.linkedinUrl,
+      publishedAt: updatedResource.publishedAt,
+      isManual: true,
+      seoTitle: updatedResource.seo.title,
+      seoDescription: updatedResource.seo.description,
+      slug: updatedResource.seo.slug
+    };
 
     res.json({
       message: 'Resource post updated successfully',
-      post: updatedPost
+      post: responsePost
     });
 
   } catch (error) {
@@ -419,24 +445,29 @@ router.delete('/posts/:id', async (req, res) => {
   try {
     const { id } = req.params;
 
-    const postIndex = manualResourcePosts.findIndex(post => post.id === id);
-    if (postIndex === -1) {
+    // Find the resource in database
+    const existingResource = await Resource.findById(id);
+    if (!existingResource) {
       return res.status(404).json({ error: 'Resource post not found' });
     }
 
-    const post = manualResourcePosts[postIndex];
-
-    // Delete associated image if it exists
-    if (post.image && post.image.startsWith('/uploads/')) {
-      const imagePath = path.join(__dirname, '../..', post.image);
+    // Delete associated image if it exists and is a local upload
+    if (existingResource.image && existingResource.image.includes('/uploads/')) {
+      const imagePath = path.join(__dirname, '../uploads/resources', path.basename(existingResource.image));
       if (fs.existsSync(imagePath)) {
         fs.unlinkSync(imagePath);
+        console.log('Deleted image file:', imagePath);
       }
     }
 
-    manualResourcePosts.splice(postIndex, 1);
+    // Delete the resource from database
+    await Resource.findByIdAndDelete(id);
+    console.log('Deleted resource from database with ID:', id);
 
-    res.json({ message: 'Resource post deleted successfully' });
+    res.json({
+      message: 'Resource post deleted successfully',
+      deletedId: id
+    });
 
   } catch (error) {
     console.error('Error deleting resource post:', error);

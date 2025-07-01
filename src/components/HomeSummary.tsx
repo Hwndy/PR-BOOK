@@ -1,9 +1,32 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { BookOpen, Mic, User, MessageSquare, Calendar, ChevronRight } from 'lucide-react';
 
-// Book chapters preview (shortened from BookPage)
-const bookChapters = [
+// Interfaces for data types
+interface ResourcePost {
+  id: string;
+  title: string;
+  category: string;
+  excerpt: string;
+  date: string;
+}
+
+interface PodcastEpisode {
+  id: string;
+  title: string;
+  description: string;
+  publishedAt: string;
+  duration?: string;
+}
+
+interface BookChapter {
+  number: string;
+  title: string;
+  description: string;
+}
+
+// Static book chapters (these don't change often)
+const bookChapters: BookChapter[] = [
   {
     number: "01",
     title: "The Evolution of PR Measurement",
@@ -21,33 +44,112 @@ const bookChapters = [
   }
 ];
 
-// Podcast episodes (shortened from Podcast)
-const podcastEpisodes = [
-  {
-    title: "Measuring PR Success in the Digital Age",
-    date: "March 15, 2024",
-    duration: "45 min"
-  },
-  {
-    title: "The Future of PR Analytics",
-    date: "March 8, 2024",
-    duration: "38 min"
-  }
-];
-
-// Blog posts (shortened from Blog)
-const blogPosts = [
-  {
-    title: "The Evolution of PR Measurement: Beyond AVE",
-    category: "Industry Trends"
-  },
-  {
-    title: "Sentiment Analysis: Understanding the Emotional Impact of Coverage",
-    category: "Methodology"
-  }
-];
-
 const HomeSummary = () => {
+  const [resourcePosts, setResourcePosts] = useState<ResourcePost[]>([]);
+  const [podcastEpisodes, setPodcastEpisodes] = useState<PodcastEpisode[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // Fetch resources
+        const resourcesResponse = await fetch(`${import.meta.env.VITE_API_URL}/api/resources/posts`);
+        if (resourcesResponse.ok) {
+          const resourcesData = await resourcesResponse.json();
+          // Get first 2 posts for summary
+          const latestResources = resourcesData.posts.slice(0, 2).map((post: any) => ({
+            id: post.id,
+            title: post.title,
+            category: post.category,
+            excerpt: post.excerpt,
+            date: post.date
+          }));
+          setResourcePosts(latestResources);
+        }
+
+        // Fetch podcast episodes
+        const podcastResponse = await fetch(`${import.meta.env.VITE_API_URL}/api/podcast/episodes`);
+        if (podcastResponse.ok) {
+          const podcastData = await podcastResponse.json();
+          // Get first 2 episodes for summary
+          const latestEpisodes = podcastData.episodes.slice(0, 2).map((episode: any) => ({
+            id: episode.id,
+            title: episode.title,
+            description: episode.description,
+            publishedAt: episode.publishedAt,
+            duration: episode.duration
+          }));
+          setPodcastEpisodes(latestEpisodes);
+        }
+      } catch (error) {
+        console.error('Error fetching home summary data:', error);
+        // Set fallback data
+        setResourcePosts([
+          {
+            id: '1',
+            title: "The Evolution of PR Measurement: Beyond AVE",
+            category: "Industry Trends",
+            excerpt: "Exploring modern approaches to PR measurement...",
+            date: "March 15, 2024"
+          },
+          {
+            id: '2',
+            title: "Sentiment Analysis: Understanding the Emotional Impact of Coverage",
+            category: "Methodology",
+            excerpt: "Deep dive into sentiment analysis techniques...",
+            date: "March 10, 2024"
+          }
+        ]);
+
+        setPodcastEpisodes([
+          {
+            id: '1',
+            title: "Measuring PR Success in the Digital Age",
+            description: "Discussion on modern PR measurement techniques",
+            publishedAt: "2024-03-15T00:00:00Z",
+            duration: "45 min"
+          },
+          {
+            id: '2',
+            title: "The Future of PR Analytics",
+            description: "Exploring upcoming trends in PR analytics",
+            publishedAt: "2024-03-08T00:00:00Z",
+            duration: "38 min"
+          }
+        ]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  const formatDate = (dateString: string) => {
+    try {
+      return new Date(dateString).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
+    } catch {
+      return dateString;
+    }
+  };
+
+  if (loading) {
+    return (
+      <section className="py-16 sm:py-20 md:py-24 bg-gray-50">
+        <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-10">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+            <p className="mt-4 text-gray-600">Loading content...</p>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section className="py-16 sm:py-20 md:py-24 bg-gray-50">
       <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-10">
@@ -181,11 +283,11 @@ const HomeSummary = () => {
               </div>
               <div className="space-y-3 mb-4">
                 {podcastEpisodes.map((episode, index) => (
-                  <div key={index} className="border-b border-gray-100 pb-2 last:border-0 last:pb-0">
+                  <div key={episode.id || index} className="border-b border-gray-100 pb-2 last:border-0 last:pb-0">
                     <h4 className="font-medium text-gray-900 text-sm">{episode.title}</h4>
                     <div className="flex justify-between text-xs text-gray-500">
-                      <span>{episode.date}</span>
-                      <span>{episode.duration}</span>
+                      <span>{formatDate(episode.publishedAt)}</span>
+                      <span>{episode.duration || 'N/A'}</span>
                     </div>
                   </div>
                 ))}
@@ -213,9 +315,9 @@ const HomeSummary = () => {
               <div className="bg-gray-50 rounded-lg p-3 mb-4">
                 <h4 className="font-medium text-gray-900 text-sm mb-2">Previous Engagements:</h4>
                 <ul className="text-xs text-gray-600 space-y-1">
-                  <li>• PR Analytics Summit, Lagos</li>
-                  <li>• Digital PR Conference, Abuja</li>
-                  <li>• Media Measurement Forum, Port Harcourt</li>
+                  <li>• PR Clinic Lagos NIPR</li>
+                  <li>• Lagos Digital PR Summit – NIPR</li>
+                  <li>• NIPR Conference Uyo.</li>
                 </ul>
               </div>
               <Link
@@ -236,15 +338,15 @@ const HomeSummary = () => {
                 <h3 className="text-xl font-semibold text-gray-900">PR Insights</h3>
               </div>
               <div className="space-y-3 mb-4">
-                {blogPosts.map((post, index) => (
-                  <div key={index} className="border-b border-gray-100 pb-2 last:border-0 last:pb-0">
+                {resourcePosts.map((post, index) => (
+                  <div key={post.id || index} className="border-b border-gray-100 pb-2 last:border-0 last:pb-0">
                     <h4 className="font-medium text-gray-900 text-sm">{post.title}</h4>
                     <span className="text-xs text-blue-600">{post.category}</span>
                   </div>
                 ))}
               </div>
               <Link
-                to="/blog"
+                to="/resources"
                 className="flex items-center text-blue-600 font-medium hover:text-blue-800 transition duration-300 text-sm"
               >
                 Read all articles

@@ -210,23 +210,20 @@ const ResourceManagement: React.FC = () => {
     try {
       setSaving(true);
 
-      let finalImageUrl = formData.imageUrl;
-      
-      // Upload image if file is selected
-      if (imageUploadType === 'upload' && imageFile) {
-        finalImageUrl = await uploadImage();
-      }
-
       const postData = {
         ...formData,
-        imageUrl: finalImageUrl,
+        imageUrl: imageUploadType === 'url' ? formData.imageUrl : '',
         tags: formData.tags
       };
 
       if (selectedPost) {
-        await apiClient.updateResourcePost(selectedPost.id, postData);
+        // For updates, pass the image file if uploading
+        const imageFileToUpload = imageUploadType === 'upload' ? imageFile : undefined;
+        await apiClient.updateResourcePost(selectedPost.id, postData, imageFileToUpload);
       } else {
-        await apiClient.createResourcePost(postData);
+        // For new posts, pass the image file if uploading
+        const imageFileToUpload = imageUploadType === 'upload' ? imageFile : undefined;
+        await apiClient.createResourcePost(postData, imageFileToUpload);
       }
 
       await fetchResourceStats();

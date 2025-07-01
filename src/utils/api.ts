@@ -114,11 +114,40 @@ class ApiClient {
     seoTitle?: string;
     seoDescription?: string;
     slug?: string;
-  }) {
-    return this.request('/api/resources/posts', {
-      method: 'POST',
-      body: JSON.stringify(post)
-    });
+  }, imageFile?: File) {
+    // If there's an image file, use FormData
+    if (imageFile) {
+      const formData = new FormData();
+      formData.append('image', imageFile);
+
+      // Append all other fields
+      Object.entries(post).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          formData.append(key, value.toString());
+        }
+      });
+
+      const token = localStorage.getItem('adminToken');
+      const response = await fetch(`${this.baseURL}/api/resources/posts`, {
+        method: 'POST',
+        headers: {
+          ...(token && { Authorization: `Bearer ${token}` })
+        },
+        body: formData
+      });
+
+      if (!response.ok) {
+        throw new Error('Resource creation failed');
+      }
+
+      return response.json();
+    } else {
+      // No file upload, use JSON
+      return this.request('/api/resources/posts', {
+        method: 'POST',
+        body: JSON.stringify(post)
+      });
+    }
   }
 
   async updateResourcePost(postId: string, post: {
@@ -135,11 +164,40 @@ class ApiClient {
     seoTitle?: string;
     seoDescription?: string;
     slug?: string;
-  }) {
-    return this.request(`/api/resources/posts/${postId}`, {
-      method: 'PUT',
-      body: JSON.stringify(post)
-    });
+  }, imageFile?: File) {
+    // If there's an image file, use FormData
+    if (imageFile) {
+      const formData = new FormData();
+      formData.append('image', imageFile);
+
+      // Append all other fields
+      Object.entries(post).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          formData.append(key, value.toString());
+        }
+      });
+
+      const token = localStorage.getItem('adminToken');
+      const response = await fetch(`${this.baseURL}/api/resources/posts/${postId}`, {
+        method: 'PUT',
+        headers: {
+          ...(token && { Authorization: `Bearer ${token}` })
+        },
+        body: formData
+      });
+
+      if (!response.ok) {
+        throw new Error('Resource update failed');
+      }
+
+      return response.json();
+    } else {
+      // No file upload, use JSON
+      return this.request(`/api/resources/posts/${postId}`, {
+        method: 'PUT',
+        body: JSON.stringify(post)
+      });
+    }
   }
 
   async deleteResourcePost(postId: string) {
