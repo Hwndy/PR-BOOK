@@ -37,6 +37,14 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
 }) => {
   const quillRef = useRef<ReactQuill>(null);
 
+  // Handle content change with proper debouncing
+  const handleChange = useCallback((content: string, delta: any, source: string, editor: any) => {
+    // Only trigger onChange for user changes, not programmatic ones
+    if (source === 'user') {
+      onChange(content);
+    }
+  }, [onChange]);
+
   // Custom image handler for inline images
   const imageHandler = useCallback(() => {
     const input = document.createElement('input');
@@ -48,16 +56,20 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
       const file = input.files?.[0];
       if (file) {
         try {
-          // Show loading state
           const quill = quillRef.current?.getEditor();
-          if (!quill) return;
+          if (!quill) {
+            console.error('Quill editor not available');
+            return;
+          }
 
-          const range = quill.getSelection();
-          if (!range) return;
+          const range = quill.getSelection(true);
+          if (!range) {
+            console.error('No selection range available');
+            return;
+          }
 
           // Insert loading placeholder
           quill.insertText(range.index, 'Uploading image...', 'user');
-          quill.setSelection(range.index + 18);
 
           // Create FormData for upload
           const formData = new FormData();
@@ -65,10 +77,20 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
 
           // Upload image to server
           const token = localStorage.getItem('adminToken');
+          if (!token) {
+            quill.deleteText(range.index, 18);
+            alert('Authentication required. Please log in again.');
+            return;
+          }
+
+          console.log('Uploading image to:', `${import.meta.env.VITE_API_URL}/api/resources/upload-inline-image`);
+          console.log('Current environment:', import.meta.env.MODE);
+          console.log('API URL:', import.meta.env.VITE_API_URL);
+
           const response = await fetch(`${import.meta.env.VITE_API_URL}/api/resources/upload-inline-image`, {
             method: 'POST',
             headers: {
-              ...(token && { Authorization: `Bearer ${token}` })
+              'Authorization': `Bearer ${token}`
             },
             credentials: 'include',
             mode: 'cors',
@@ -80,55 +102,149 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
 
           if (response.ok) {
             const data = await response.json();
-            const imageUrl = data.imageUrl;
+            console.log('Image upload response:', data);
 
-            // Insert image into editor
-            const quill = quillRef.current?.getEditor();
-            if (quill) {
-              const range = quill.getSelection();
-              const index = range ? range.index : quill.getLength();
-              quill.insertEmbed(index, 'image', imageUrl);
-              quill.setSelection(index + 1, 0);
+            if (data.imageUrl) {
+              console.log('Inserting image with URL:', data.imageUrl);
+
+              // Ensure the URL is properly formatted
+              let imageUrl = data.imageUrl;
+              if (!imageUrl.startsWith('http')) {
+                // If it's a relative URL, make it absolute
+                const baseUrl = import.meta.env.VITE_API_URL || 'https://pr-book.onrender.com';
+                imageUrl = imageUrl.startsWith('/') ? `${baseUrl}${imageUrl}` : `${baseUrl}/${imageUrl}`;
+                console.log('Converted to absolute URL:', imageUrl);
+              }
+
+              // Test if the image URL is accessible
+              const testImg = new Image();
+              testImg.onload = () => {
+                console.log('Image URL is accessible:', imageUrl);
+              };
+              testImg.onerror = () => {
+                console.error('Image URL is not accessible:', imageUrl);
+                alert('Image uploaded but URL is not accessible. Please check server configuration.');
+              };
+              testImg.src = imageUrl;
+
+              // Insert image into editor at the current position
+              try {
+                // Method 1: Try insertEmbed with 'user' source
+                quill.insertEmbed(range.index, 'image', imageUrl, 'user');
+                quill.setSelection(range.index + 1, 0);
+                console.log('Image inserted successfully with URL:', imageUrl);
+
+                // Verify the image was actually inserted
+                setTimeout(() => {
+                  const delta = quill.getContents();
+                  const hasImage = delta.ops?.some(op => op.insert && typeof op.insert === 'object' && op.insert.image);
+                  console.log('Image verification - found in content:', hasImage);
+
+                  if (!hasImage) {
+                    console.warn('Image not found in content, trying alternative method');
+                    // Method 2: Try without 'user' source
+                    quill.insertEmbed(range.index, 'image', imageUrl);
+                    quill.setSelection(range.index + 1, 0);
+                  }
+
+                  // Force editor to refresh
+                  const editor = quillRef.current?.getEditor();
+                  if (editor) {
+                    editor.update();
+                  }
+                }, 100);
+              } catch (embedError) {
+                console.error('Error inserting image embed:', embedError);
+                // Fallback: Insert as HTML
+                const imageHtml = `<img src="${imageUrl}" alt="Uploaded image" style="max-width: 100%; height: auto;" />`;
+                quill.clipboard.dangerouslyPasteHTML(range.index, imageHtml);
+                console.log('Image inserted as HTML fallback');
+              }
+            } else {
+              console.error('No imageUrl in response:', data);
+              alert('Image upload failed: No image URL returned');
             }
           } else {
-            alert('Failed to upload image');
+            const errorData = await response.text();
+            console.error('Image upload failed:', response.status, errorData);
+            alert(`Failed to upload image: ${response.status} ${response.statusText}`);
           }
         } catch (error) {
           console.error('Error uploading image:', error);
-          alert('Error uploading image');
+          alert(`Error uploading image: ${error.message}`);
+
+          // Clean up loading text if it exists
+          const quill = quillRef.current?.getEditor();
+          if (quill) {
+            const range = quill.getSelection();
+            if (range) {
+              const text = quill.getText(range.index - 18, 18);
+              if (text === 'Uploading image...') {
+                quill.deleteText(range.index - 18, 18);
+              }
+            }
+          }
         }
       }
     };
   }, []);
 
   // Custom link handler
-  const linkHandler = () => {
+  const linkHandler = useCallback(() => {
     const quill = quillRef.current?.getEditor();
-    if (quill) {
-      const range = quill.getSelection();
-      if (range) {
-        const url = prompt('Enter the URL:');
-        if (url) {
-          quill.format('link', url);
-        }
+    if (!quill) {
+      console.error('Quill editor not available for link handler');
+      return;
+    }
+
+    const range = quill.getSelection(true);
+    if (!range) {
+      console.error('No selection range for link');
+      return;
+    }
+
+    // Get selected text if any
+    const selectedText = quill.getText(range.index, range.length);
+    const url = prompt('Enter the URL:', 'https://');
+
+    if (url && url.trim()) {
+      if (range.length > 0) {
+        // Format selected text as link
+        quill.format('link', url.trim());
+      } else {
+        // Insert link with URL as text
+        const linkText = selectedText || url.trim();
+        quill.insertText(range.index, linkText, 'link', url.trim());
+        quill.setSelection(range.index + linkText.length, 0);
       }
     }
-  };
+  }, []);
 
   // Custom video handler
-  const videoHandler = () => {
+  const videoHandler = useCallback(() => {
     const quill = quillRef.current?.getEditor();
-    if (quill) {
-      const range = quill.getSelection();
-      if (range) {
-        const url = prompt('Enter video URL (YouTube, Vimeo, etc.):');
-        if (url) {
-          quill.insertEmbed(range.index, 'video', url);
-          quill.setSelection(range.index + 1, 0);
-        }
+    if (!quill) {
+      console.error('Quill editor not available for video handler');
+      return;
+    }
+
+    const range = quill.getSelection(true);
+    if (!range) {
+      console.error('No selection range for video');
+      return;
+    }
+
+    const url = prompt('Enter video URL (YouTube, Vimeo, etc.):', 'https://');
+    if (url && url.trim()) {
+      try {
+        quill.insertEmbed(range.index, 'video', url.trim(), 'user');
+        quill.setSelection(range.index + 1, 0);
+      } catch (error) {
+        console.error('Error inserting video:', error);
+        alert('Error inserting video. Please check the URL format.');
       }
     }
-  };
+  }, []);
 
   // Toolbar configuration with all standard features
   const modules = useMemo(() => ({
@@ -281,13 +397,52 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
     }
   }, [height]);
 
+  // Debug function to check editor content
+  const debugEditorContent = useCallback(() => {
+    const quill = quillRef.current?.getEditor();
+    if (quill) {
+      const delta = quill.getContents();
+      const html = quill.root.innerHTML;
+      console.log('Editor Delta:', delta);
+      console.log('Editor HTML:', html);
+
+      // Check for images in content
+      const images = quill.root.querySelectorAll('img');
+      console.log('Images found in editor:', images.length);
+      images.forEach((img, index) => {
+        console.log(`Image ${index + 1}:`, {
+          src: img.src,
+          alt: img.alt,
+          style: img.style.cssText,
+          visible: img.offsetWidth > 0 && img.offsetHeight > 0,
+          naturalWidth: img.naturalWidth,
+          naturalHeight: img.naturalHeight
+        });
+      });
+    }
+  }, []);
+
+  // Add debug button in development
+  const isDevelopment = import.meta.env.DEV;
+
   return (
     <div className="rich-text-editor">
+      {isDevelopment && (
+        <div className="mb-2">
+          <button
+            type="button"
+            onClick={debugEditorContent}
+            className="px-2 py-1 text-xs bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
+          >
+            Debug Editor Content
+          </button>
+        </div>
+      )}
       <QuillWrapper
         ref={quillRef}
         theme="snow"
         value={value}
-        onChange={onChange}
+        onChange={handleChange}
         modules={modules}
         formats={formats}
         placeholder={placeholder}

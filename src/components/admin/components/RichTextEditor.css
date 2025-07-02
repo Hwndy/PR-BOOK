@@ -206,6 +206,24 @@
   border-radius: 8px;
   margin: 1em 0;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  position: relative !important;
+}
+
+/* Ensure images are visible in all states */
+.rich-text-editor .ql-editor img[src] {
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  min-height: 50px;
+  min-width: 50px;
+}
+
+/* Loading state for images */
+.rich-text-editor .ql-editor img:not([src]),
+.rich-text-editor .ql-editor img[src=""] {
+  display: none;
 }
 
 .rich-text-editor .ql-editor a {

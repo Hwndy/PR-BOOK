@@ -93,14 +93,25 @@ app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, x-paystack-signature, X-Requested-With, Accept, Origin');
   res.setHeader('Access-Control-Max-Age', '86400');
 
+  // Add CSP headers to allow images from same origin
+  if (req.path.startsWith('/uploads/')) {
+    res.setHeader('Content-Security-Policy', "default-src 'self'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline';");
+  }
+
   next();
 });
 
 app.use(bodyParser.json());
 
-// Serve static files from uploads directory
+// Serve static files from uploads directory with CORS headers
 const uploadsPath = path.join(__dirname, 'uploads');
-app.use('/uploads', express.static(uploadsPath));
+app.use('/uploads', (req, res, next) => {
+  // Add CORS headers for static files
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+  next();
+}, express.static(uploadsPath));
 
 // Ensure uploads directory exists
 const fs = require('fs');

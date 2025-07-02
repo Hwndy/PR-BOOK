@@ -10,6 +10,18 @@ import {
   ResourceFormData
 } from './resources/types';
 
+interface ResourceAPIResponse {
+  posts: ResourcePost[];
+  meta: {
+    lastUpdated?: string;
+    linkedinConnected?: boolean;
+  };
+  profile?: {
+    name?: string;
+    linkedinUrl?: string;
+  };
+}
+
 const ResourceManagement: React.FC = () => {
   const [stats, setStats] = useState<ResourceStatsType | null>(null);
   const [loading, setLoading] = useState(true);
@@ -43,7 +55,12 @@ const ResourceManagement: React.FC = () => {
   const fetchResourceStats = async () => {
     try {
       setLoading(true);
-      const data = await apiClient.getResourcePosts();
+      const data = await apiClient.getResourcePosts() as ResourceAPIResponse;
+
+      if (!data || !data.posts) {
+        console.error('Invalid response format:', data);
+        throw new Error('Invalid response format from server');
+      }
 
       const totalEngagement = data.posts.reduce(
         (total: number, post: ResourcePost) =>
@@ -54,15 +71,15 @@ const ResourceManagement: React.FC = () => {
       setStats({
         totalPosts: data.posts.length,
         totalEngagement,
-        lastUpdated: data.meta.lastUpdated,
+        lastUpdated: data.meta?.lastUpdated || new Date().toISOString(),
         posts: data.posts,
         profileName: data.profile?.name,
         profileUrl: data.profile?.linkedinUrl,
-        linkedinConnected: data.meta?.linkedinConnected,
+        linkedinConnected: data.meta?.linkedinConnected || false,
       });
     } catch (error) {
       console.error('Error fetching resource stats:', error);
-      alert('Failed to load resource data');
+      alert('Failed to load resource data. Please check your connection and try again.');
     } finally {
       setLoading(false);
     }
@@ -198,21 +215,28 @@ const ResourceManagement: React.FC = () => {
         slug: data.slug
       };
 
+      let result;
       if (selectedPost) {
         // For updates, pass the image file if uploading
         const imageFileToUpload = imageUploadType === 'upload' ? imageFile : undefined;
-        await apiClient.updateResourcePost(selectedPost.id, postData, imageFileToUpload);
+        result = await apiClient.updateResourcePost(selectedPost.id, postData, imageFileToUpload);
+        console.log('Resource updated:', result);
         alert('Resource updated successfully!');
       } else {
         // For new posts, pass the image file if uploading
         const imageFileToUpload = imageUploadType === 'upload' ? imageFile : undefined;
-        await apiClient.createResourcePost(postData, imageFileToUpload);
+        result = await apiClient.createResourcePost(postData, imageFileToUpload);
+        console.log('Resource created:', result);
         alert('Resource created successfully!');
       }
 
-      await fetchResourceStats();
+      // Reset form and close modals
+      resetForm();
       setIsCreateModalOpen(false);
       setIsPreviewModalOpen(false);
+
+      // Refresh the data to show the new/updated post
+      await fetchResourceStats();
 
     } catch (error) {
       console.error('Error saving resource post:', error);

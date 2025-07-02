@@ -4,8 +4,65 @@ const crypto = require('crypto');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const jwt = require('jsonwebtoken');
 const Resource = require('../models/Resource');
 const router = express.Router();
+
+// JWT secret from environment
+const JWT_SECRET = process.env.JWT_SECRET || 'fallback-secret-key-change-in-production';
+
+// JWT authentication middleware
+const authenticateToken = (req, res, next) => {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1];
+
+  if (!token) {
+    return res.status(401).json({ error: 'Access token required' });
+  }
+
+  jwt.verify(token, JWT_SECRET, (err, user) => {
+    if (err) {
+      console.error('Token verification error:', err);
+      return res.status(403).json({ error: 'Invalid or expired token' });
+    }
+    req.user = user;
+    next();
+  });
+};
+
+// Utility function to generate proper base URL
+const getBaseUrl = (req) => {
+  if (process.env.NODE_ENV === 'production') {
+    return process.env.PUBLIC_URL || process.env.BACKEND_URL || 'https://pr-book.onrender.com';
+  } else {
+    // For development, use the request host
+    const protocol = req.secure || req.headers['x-forwarded-proto'] === 'https' ? 'https' : 'http';
+    const host = req.get('host') || 'localhost:5000';
+    return `${protocol}://${host}`;
+  }
+};
+
+// Utility function to generate SEO description within character limits
+const generateSeoDescription = (seoDescription, excerpt, content) => {
+  let desc = '';
+
+  if (seoDescription && seoDescription.trim()) {
+    desc = seoDescription.trim();
+  } else if (excerpt && excerpt.trim()) {
+    desc = excerpt.trim();
+  } else if (content) {
+    // Remove HTML tags and get plain text
+    desc = content.replace(/<[^>]*>/g, '').trim();
+    desc = desc.substring(0, 150);
+  }
+
+  // Ensure description is within SEO limits (160 characters)
+  if (desc.length > 160) {
+    desc = desc.substring(0, 157) + '...';
+  }
+
+  return desc;
+};
 
 // Configure multer for image uploads
 const storage = multer.diskStorage({
@@ -254,8 +311,12 @@ router.post('/refresh', async (req, res) => {
 });
 
 // Create new resource post
-router.post('/posts', upload.single('image'), async (req, res) => {
+router.post('/posts', authenticateToken, upload.single('image'), async (req, res) => {
   try {
+    console.log('Creating new resource post...');
+    console.log('Request body:', req.body);
+    console.log('Uploaded file:', req.file);
+
     const {
       title,
       excerpt,
@@ -270,27 +331,41 @@ router.post('/posts', upload.single('image'), async (req, res) => {
       seoDescription,
       slug
     } = req.body;
-    
+
     if (!title || !content) {
+      console.log('Missing required fields - title:', !!title, 'content:', !!content);
       return res.status(400).json({ error: 'Title and content are required' });
     }
 
-    // Handle image - either uploaded file or URL
+    // Handle image - either uploaded file or URL (optional)
     let image = imageUrl || '';
     if (req.file) {
-      // Generate full URL for production
-      const baseUrl = process.env.PUBLIC_URL || process.env.BACKEND_URL || 'https://pr-book.onrender.com';
+      const baseUrl = getBaseUrl(req);
       image = `${baseUrl}/uploads/resources/${req.file.filename}`;
-      console.log('Generated image URL:', image);
+      console.log('Resource creation - environment:', process.env.NODE_ENV);
+      console.log('Resource creation - base URL:', baseUrl);
+      console.log('Resource creation - generated image URL:', image);
     }
 
-    // Validate that we have an image
-    if (!image) {
-      return res.status(400).json({ error: 'Image is required - either upload a file or provide an image URL' });
+    // Image is now optional
+    console.log('Final image URL:', image || 'No image provided');
+
+    // Generate unique slug
+    let baseSlug = (slug && slug.trim()) || title.toLowerCase().replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-').trim();
+    let uniqueSlug = baseSlug;
+    let counter = 1;
+
+    // Check if slug already exists and make it unique
+    while (await Resource.findOne({ 'seo.slug': uniqueSlug })) {
+      uniqueSlug = `${baseSlug}-${counter}`;
+      counter++;
     }
 
-    // Create new resource in database
-    const newResource = new Resource({
+    // Generate proper SEO description using utility function
+    const seoDesc = generateSeoDescription(seoDescription, excerpt, content);
+
+    // Prepare resource data
+    const resourceData = {
       title: title.trim(),
       excerpt: excerpt?.trim() || content.substring(0, 150) + '...',
       content: content.trim(),
@@ -302,14 +377,27 @@ router.post('/posts', upload.single('image'), async (req, res) => {
       readTime: readTime ? parseInt(readTime) : Math.ceil(content.split(/\s+/).length / 200),
       seo: {
         title: (seoTitle && seoTitle.trim()) || title.trim(),
-        description: (seoDescription && seoDescription.trim()) || (excerpt && excerpt.trim()) || content.substring(0, 160) + '...',
-        slug: (slug && slug.trim()) || title.toLowerCase().replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-').trim()
+        description: seoDesc,
+        slug: uniqueSlug
       },
       source: 'manual',
       linkedinUrl: 'https://www.linkedin.com/in/philipodiakose/'
-    });
+    };
+
+    console.log('Resource data to save:', JSON.stringify(resourceData, null, 2));
+
+    // Create new resource in database
+    const newResource = new Resource(resourceData);
+
+    // Check database connection
+    const mongoose = require('mongoose');
+    if (mongoose.connection.readyState !== 1) {
+      console.error('Database not connected. Connection state:', mongoose.connection.readyState);
+      return res.status(500).json({ error: 'Database connection error' });
+    }
 
     // Save to database
+    console.log('Attempting to save resource to database...');
     const savedResource = await newResource.save();
     console.log('Created new resource in database with ID:', savedResource._id);
     console.log('Image URL:', savedResource.image);
@@ -343,12 +431,34 @@ router.post('/posts', upload.single('image'), async (req, res) => {
 
   } catch (error) {
     console.error('Error creating resource post:', error);
-    res.status(500).json({ error: 'Failed to create resource post' });
+
+    // Handle specific MongoDB errors
+    if (error.code === 11000) {
+      // Duplicate key error (likely slug)
+      const field = Object.keys(error.keyPattern)[0];
+      return res.status(400).json({
+        error: `A resource with this ${field} already exists. Please use a different ${field}.`,
+        field: field
+      });
+    }
+
+    if (error.name === 'ValidationError') {
+      const validationErrors = Object.values(error.errors).map(err => err.message);
+      return res.status(400).json({
+        error: 'Validation failed',
+        details: validationErrors
+      });
+    }
+
+    res.status(500).json({
+      error: 'Failed to create resource post',
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
   }
 });
 
 // Update resource post
-router.put('/posts/:id', upload.single('image'), async (req, res) => {
+router.put('/posts/:id', authenticateToken, upload.single('image'), async (req, res) => {
   try {
     const { id } = req.params;
     const {
@@ -383,11 +493,17 @@ router.put('/posts/:id', upload.single('image'), async (req, res) => {
           console.log('Deleted old image:', oldImagePath);
         }
       }
-      // Generate full URL for production
-      const baseUrl = process.env.PUBLIC_URL || process.env.BACKEND_URL || 'https://pr-book.onrender.com';
+      const baseUrl = getBaseUrl(req);
       image = `${baseUrl}/uploads/resources/${req.file.filename}`;
-      console.log('Updated image URL:', image);
+      console.log('Resource update - environment:', process.env.NODE_ENV);
+      console.log('Resource update - base URL:', baseUrl);
+      console.log('Resource update - updated image URL:', image);
     }
+
+    // Generate proper SEO description for update using utility function
+    const updatedSeoDesc = seoDescription ?
+      generateSeoDescription(seoDescription, excerpt, content) :
+      existingResource.seo.description;
 
     // Update the resource
     const updateData = {
@@ -401,7 +517,7 @@ router.put('/posts/:id', upload.single('image'), async (req, res) => {
       status: status || existingResource.status,
       readTime: readTime ? parseInt(readTime) : existingResource.readTime,
       'seo.title': (seoTitle && seoTitle.trim()) || existingResource.seo.title,
-      'seo.description': (seoDescription && seoDescription.trim()) || existingResource.seo.description,
+      'seo.description': updatedSeoDesc,
       'seo.slug': (slug && slug.trim()) || existingResource.seo.slug
     };
 
@@ -446,7 +562,7 @@ router.put('/posts/:id', upload.single('image'), async (req, res) => {
 });
 
 // Delete resource post
-router.delete('/posts/:id', async (req, res) => {
+router.delete('/posts/:id', authenticateToken, async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -553,15 +669,16 @@ router.get('/posts/:identifier', async (req, res) => {
 });
 
 // Image upload endpoint
-router.post('/upload-image', upload.single('image'), (req, res) => {
+router.post('/upload-image', authenticateToken, upload.single('image'), (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ error: 'No image file provided' });
     }
 
-    // Generate full URL for production
-    const baseUrl = process.env.PUBLIC_URL || process.env.BACKEND_URL || 'https://pr-book.onrender.com';
+    const baseUrl = getBaseUrl(req);
     const imageUrl = `${baseUrl}/uploads/resources/${req.file.filename}`;
+    console.log('Upload endpoint - environment:', process.env.NODE_ENV);
+    console.log('Upload endpoint - base URL:', baseUrl);
     console.log('Upload endpoint - generated image URL:', imageUrl);
     res.json({
       message: 'Image uploaded successfully',
@@ -575,22 +692,28 @@ router.post('/upload-image', upload.single('image'), (req, res) => {
 });
 
 // Upload inline image endpoint (for rich text editor)
-router.post('/upload-inline-image', upload.single('image'), (req, res) => {
+router.post('/upload-inline-image', authenticateToken, upload.single('image'), (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ error: 'No image file provided' });
     }
 
-    // Generate full URL for production
-    const baseUrl = process.env.PUBLIC_URL || process.env.BACKEND_URL || 'https://pr-book.onrender.com';
+    const baseUrl = getBaseUrl(req);
     const imageUrl = `${baseUrl}/uploads/resources/${req.file.filename}`;
+    console.log('Inline image upload - environment:', process.env.NODE_ENV);
+    console.log('Inline image upload - base URL:', baseUrl);
     console.log('Inline image upload - generated image URL:', imageUrl);
 
     res.json({
       success: true,
       message: 'Inline image uploaded successfully',
       imageUrl: imageUrl,
-      url: imageUrl // Alternative key for compatibility
+      url: imageUrl, // Alternative key for compatibility
+      filename: req.file.filename,
+      originalname: req.file.originalname,
+      size: req.file.size,
+      baseUrl: baseUrl,
+      fullPath: `/uploads/resources/${req.file.filename}`
     });
   } catch (error) {
     console.error('Error uploading inline image:', error);
@@ -598,6 +721,40 @@ router.post('/upload-inline-image', upload.single('image'), (req, res) => {
       success: false,
       error: 'Failed to upload inline image'
     });
+  }
+});
+
+// Test endpoint to verify image serving
+router.get('/test-image-serving', (req, res) => {
+  const fs = require('fs');
+  const path = require('path');
+
+  const uploadsDir = path.join(__dirname, '../uploads/resources');
+  const baseUrl = getBaseUrl(req);
+
+  try {
+    let files = [];
+    if (fs.existsSync(uploadsDir)) {
+      files = fs.readdirSync(uploadsDir).map(file => ({
+        filename: file,
+        url: `${baseUrl}/uploads/resources/${file}`,
+        path: path.join(uploadsDir, file),
+        exists: fs.existsSync(path.join(uploadsDir, file))
+      }));
+    }
+
+    res.json({
+      uploadsDir,
+      baseUrl,
+      filesCount: files.length,
+      files: files.slice(0, 5), // Show first 5 files
+      staticServing: {
+        endpoint: '/uploads',
+        fullPath: `${baseUrl}/uploads/resources/`
+      }
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
 });
 

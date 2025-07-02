@@ -33,7 +33,25 @@ class ApiClient {
       if (!response.ok) {
         const errorText = await response.text();
         console.error(`HTTP error! status: ${response.status}, response: ${errorText}`);
-        throw new Error(`HTTP error! status: ${response.status}`);
+
+        // Try to parse error response for better error messages
+        let errorMessage = `HTTP error! status: ${response.status}`;
+        try {
+          const errorData = JSON.parse(errorText);
+          if (errorData.error) {
+            errorMessage = errorData.error;
+            if (errorData.details && Array.isArray(errorData.details)) {
+              errorMessage += ': ' + errorData.details.join(', ');
+            }
+          }
+        } catch (parseError) {
+          // If parsing fails, use the original error text
+          if (errorText) {
+            errorMessage = errorText;
+          }
+        }
+
+        throw new Error(errorMessage);
       }
 
       return await response.json();
@@ -138,6 +156,8 @@ class ApiClient {
         headers: {
           ...(token && { Authorization: `Bearer ${token}` })
         },
+        credentials: 'include',
+        mode: 'cors',
         body: formData
       });
 
