@@ -23,10 +23,17 @@ const generateToken = (userId, username, role) => {
 // Admin login endpoint with fallback
 router.post('/admin/login', async (req, res) => {
   try {
+    console.log('Login attempt received:', {
+      origin: req.headers.origin,
+      userAgent: req.headers['user-agent'],
+      timestamp: new Date().toISOString()
+    });
+
     const { username, password } = req.body;
 
     // Validate input
     if (!username || !password) {
+      console.log('Login failed: Missing credentials');
       return res.status(400).json({
         success: false,
         message: 'Username and password are required'
