@@ -104,7 +104,7 @@ const ResourceForm: React.FC<ResourceFormProps> = ({
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
       if (hasUnsavedChanges) {
         e.preventDefault();
-        e.returnValue = '';
+        return (e.returnValue = '');
       }
     };
 
@@ -146,67 +146,68 @@ const ResourceForm: React.FC<ResourceFormProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
-        <div className="flex justify-between items-center p-6 border-b border-gray-200">
-          <div className="flex items-center space-x-4">
-            <h3 className="text-lg font-medium text-gray-900">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-start sm:items-center justify-center z-50 p-2 sm:p-4">
+      <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[95vh] sm:max-h-[90vh] overflow-y-auto mt-2 sm:mt-0">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center p-4 sm:p-6 border-b border-gray-200 space-y-3 sm:space-y-0">
+          <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-4 min-w-0">
+            <h3 className="text-base sm:text-lg font-medium text-gray-900">
               {selectedPost ? 'Edit Resource' : 'Create New Resource'}
             </h3>
 
             {/* Auto-save status */}
             {selectedPost && (
-              <div className="flex items-center space-x-2 text-sm">
+              <div className="flex items-center space-x-2 text-xs sm:text-sm">
                 {autoSaveStatus === 'saving' && (
                   <div className="flex items-center text-blue-600">
-                    <RefreshCw className="h-4 w-4 mr-1 animate-spin" />
+                    <RefreshCw className="h-3 w-3 sm:h-4 sm:w-4 mr-1 animate-spin" />
                     Saving...
                   </div>
                 )}
                 {autoSaveStatus === 'saved' && (
                   <div className="flex items-center text-green-600">
-                    <CheckCircle className="h-4 w-4 mr-1" />
+                    <CheckCircle className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
                     Auto-saved
                   </div>
                 )}
                 {autoSaveStatus === 'error' && (
                   <div className="flex items-center text-red-600">
-                    <AlertCircle className="h-4 w-4 mr-1" />
+                    <AlertCircle className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
                     Save failed
                   </div>
                 )}
                 {lastSaved && autoSaveStatus === 'idle' && hasUnsavedChanges && (
                   <div className="flex items-center text-gray-500">
-                    <Clock className="h-4 w-4 mr-1" />
-                    Last saved: {lastSaved.toLocaleTimeString()}
+                    <Clock className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
+                    <span className="hidden sm:inline">Last saved: {lastSaved.toLocaleTimeString()}</span>
+                    <span className="sm:hidden">Saved</span>
                   </div>
                 )}
               </div>
             )}
           </div>
 
-          <div className="flex space-x-2">
+          <div className="flex space-x-2 flex-shrink-0">
             {onPreview && (
               <button
                 onClick={onPreview}
-                className="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200 transition-colors inline-flex items-center"
+                className="bg-gray-100 text-gray-700 px-3 sm:px-4 py-2 rounded-lg hover:bg-gray-200 transition-colors inline-flex items-center text-sm"
               >
-                <Eye className="h-4 w-4 mr-2" />
-                Preview
+                <Eye className="h-4 w-4 mr-1 sm:mr-2" />
+                <span className="hidden sm:inline">Preview</span>
               </button>
             )}
             <button
               onClick={handleClose}
-              className="text-gray-400 hover:text-gray-600"
+              className="text-gray-400 hover:text-gray-600 p-1"
             >
-              <X className="h-6 w-6" />
+              <X className="h-5 w-5 sm:h-6 sm:w-6" />
             </button>
           </div>
         </div>
 
-        <div className="p-6 space-y-8">
+        <div className="p-4 sm:p-6 space-y-6 sm:space-y-8">
           {/* Basic Information */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Title *
@@ -309,7 +310,7 @@ const ResourceForm: React.FC<ResourceFormProps> = ({
           </div>
 
           {/* Status and Read Time */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Status
@@ -454,27 +455,29 @@ const ResourceForm: React.FC<ResourceFormProps> = ({
         </div>
 
         {/* Footer */}
-        <div className="flex justify-end space-x-4 p-6 border-t border-gray-200">
+        <div className="flex flex-col sm:flex-row sm:justify-end space-y-3 sm:space-y-0 sm:space-x-4 p-4 sm:p-6 border-t border-gray-200">
           <button
             onClick={handleClose}
-            className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+            className="w-full sm:w-auto px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors order-2 sm:order-1"
           >
             Cancel
           </button>
           <button
             onClick={handleSubmit}
             disabled={saving || !formData.title || !formData.content}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 inline-flex items-center"
+            className="w-full sm:w-auto px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 inline-flex items-center justify-center order-1 sm:order-2"
           >
             {saving ? (
               <>
                 <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                Saving...
+                <span className="hidden sm:inline">Saving...</span>
+                <span className="sm:hidden">Saving</span>
               </>
             ) : (
               <>
                 <Save className="h-4 w-4 mr-2" />
-                {selectedPost ? 'Update Resource' : 'Create Resource'}
+                <span className="hidden sm:inline">{selectedPost ? 'Update Resource' : 'Create Resource'}</span>
+                <span className="sm:hidden">{selectedPost ? 'Update' : 'Create'}</span>
               </>
             )}
           </button>

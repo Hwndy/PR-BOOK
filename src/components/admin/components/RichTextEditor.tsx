@@ -1,7 +1,26 @@
-import React, { useRef, useMemo, useCallback, useEffect } from 'react';
+import React, { useRef, useMemo, useCallback, useEffect, forwardRef } from 'react';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import './RichTextEditor.css';
+import { suppressReactQuillWarnings, restoreReactQuillWarnings } from '../../../utils/suppressWarnings';
+
+// Create a wrapper component to handle ReactQuill properly
+// This suppresses the findDOMNode deprecation warning from ReactQuill
+const QuillWrapper = forwardRef<ReactQuill, any>((props, ref) => {
+  useEffect(() => {
+    // Suppress ReactQuill findDOMNode warnings on mount
+    suppressReactQuillWarnings();
+
+    return () => {
+      // Restore warnings on unmount
+      restoreReactQuillWarnings();
+    };
+  }, []);
+
+  return <ReactQuill ref={ref} {...props} />;
+});
+
+QuillWrapper.displayName = 'QuillWrapper';
 
 interface RichTextEditorProps {
   value: string;
@@ -264,7 +283,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
 
   return (
     <div className="rich-text-editor">
-      <ReactQuill
+      <QuillWrapper
         ref={quillRef}
         theme="snow"
         value={value}

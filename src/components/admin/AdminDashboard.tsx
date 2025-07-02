@@ -20,13 +20,13 @@ const AdminDashboard: React.FC = () => {
       <AdminSidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
       {/* Main content */}
-      <div className="flex-1 flex flex-col lg:ml-64">
+      <div className="flex-1 flex flex-col lg:ml-64 min-w-0">
         {/* Header */}
         <AdminHeader onMenuClick={() => setSidebarOpen(true)} />
 
         {/* Page content */}
-        <main className="flex-1 py-6">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <main className="flex-1 py-4 sm:py-6">
+          <div className="max-w-full mx-auto px-2 sm:px-4 lg:px-6 xl:px-8">
             <Routes>
               <Route path="/" element={<DashboardOverview />} />
               <Route path="/orders" element={<OrdersManagement />} />

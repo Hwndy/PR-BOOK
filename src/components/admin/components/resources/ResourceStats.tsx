@@ -28,56 +28,57 @@ const ResourceStats: React.FC<ResourceStatsProps> = ({
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Header */}
-      <div className="flex justify-between items-center">
-        <div>
-          <h2 className="text-2xl font-bold text-gray-900">Resource Management</h2>
-          <p className="text-gray-600">Create and manage PR resources and insights</p>
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center space-y-4 sm:space-y-0">
+        <div className="min-w-0">
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Resource Management</h2>
+          <p className="text-sm sm:text-base text-gray-600 mt-1">Create and manage PR resources and insights</p>
         </div>
         <button
           onClick={onCreateNew}
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors inline-flex items-center"
+          className="bg-blue-600 text-white px-3 sm:px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors inline-flex items-center justify-center text-sm sm:text-base flex-shrink-0"
         >
           <Plus className="h-4 w-4 mr-2" />
-          Create Resource
+          <span className="hidden sm:inline">Create Resource</span>
+          <span className="sm:hidden">Create</span>
         </button>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white p-6 rounded-lg shadow border border-gray-200">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+        <div className="bg-white p-4 sm:p-6 rounded-lg shadow border border-gray-200">
           <div className="flex items-center">
-            <div className="p-2 bg-blue-100 rounded-lg">
-              <FileText className="h-6 w-6 text-blue-600" />
+            <div className="p-2 bg-blue-100 rounded-lg flex-shrink-0">
+              <FileText className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600" />
             </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Total Resources</p>
-              <p className="text-2xl font-bold text-gray-900">{stats?.totalPosts || 0}</p>
+            <div className="ml-3 sm:ml-4 min-w-0">
+              <p className="text-xs sm:text-sm font-medium text-gray-600">Total Resources</p>
+              <p className="text-xl sm:text-2xl font-bold text-gray-900">{stats?.totalPosts || 0}</p>
             </div>
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded-lg shadow border border-gray-200">
+        <div className="bg-white p-4 sm:p-6 rounded-lg shadow border border-gray-200">
           <div className="flex items-center">
-            <div className="p-2 bg-green-100 rounded-lg">
-              <TrendingUp className="h-6 w-6 text-green-600" />
+            <div className="p-2 bg-green-100 rounded-lg flex-shrink-0">
+              <TrendingUp className="h-5 w-5 sm:h-6 sm:w-6 text-green-600" />
             </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Total Engagement</p>
-              <p className="text-2xl font-bold text-gray-900">{stats?.totalEngagement || 0}</p>
+            <div className="ml-3 sm:ml-4 min-w-0">
+              <p className="text-xs sm:text-sm font-medium text-gray-600">Total Engagement</p>
+              <p className="text-xl sm:text-2xl font-bold text-gray-900">{stats?.totalEngagement || 0}</p>
             </div>
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded-lg shadow border border-gray-200">
+        <div className="bg-white p-4 sm:p-6 rounded-lg shadow border border-gray-200 sm:col-span-2 lg:col-span-1">
           <div className="flex items-center">
-            <div className="p-2 bg-purple-100 rounded-lg">
-              <Calendar className="h-6 w-6 text-purple-600" />
+            <div className="p-2 bg-purple-100 rounded-lg flex-shrink-0">
+              <Calendar className="h-5 w-5 sm:h-6 sm:w-6 text-purple-600" />
             </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Last Updated</p>
-              <p className="text-sm font-bold text-gray-900">
+            <div className="ml-3 sm:ml-4 min-w-0">
+              <p className="text-xs sm:text-sm font-medium text-gray-600">Last Updated</p>
+              <p className="text-sm sm:text-base font-bold text-gray-900">
                 {stats?.lastUpdated ? new Date(stats.lastUpdated).toLocaleDateString() : 'Never'}
               </p>
             </div>
@@ -87,15 +88,15 @@ const ResourceStats: React.FC<ResourceStatsProps> = ({
 
       {/* LinkedIn Connection Status */}
       {stats?.linkedinConnected && (
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center">
-              <ExternalLink className="h-5 w-5 text-blue-600 mr-2" />
-              <div>
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 sm:p-4">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">
+            <div className="flex items-center min-w-0">
+              <ExternalLink className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600 mr-2 flex-shrink-0" />
+              <div className="min-w-0">
                 <p className="text-sm font-medium text-blue-900">
                   LinkedIn Connected
                 </p>
-                <p className="text-sm text-blue-700">
+                <p className="text-xs sm:text-sm text-blue-700 truncate">
                   Syncing posts from {stats.profileName || 'LinkedIn profile'}
                 </p>
               </div>
@@ -105,7 +106,7 @@ const ResourceStats: React.FC<ResourceStatsProps> = ({
                 href={stats.profileUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-blue-600 hover:text-blue-700 text-sm font-medium"
+                className="text-blue-600 hover:text-blue-700 text-xs sm:text-sm font-medium flex-shrink-0"
               >
                 View Profile
               </a>
@@ -115,15 +116,16 @@ const ResourceStats: React.FC<ResourceStatsProps> = ({
       )}
 
       {/* Actions */}
-      <div className="flex justify-between items-center">
-        <div className="flex space-x-4">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center space-y-3 sm:space-y-0">
+        <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4">
           <button
             onClick={onRefresh}
             disabled={refreshing}
-            className="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200 transition-colors inline-flex items-center disabled:opacity-50"
+            className="bg-gray-100 text-gray-700 px-3 sm:px-4 py-2 rounded-lg hover:bg-gray-200 transition-colors inline-flex items-center justify-center disabled:opacity-50 text-sm sm:text-base"
           >
             <RefreshCw className={`h-4 w-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
-            Refresh Data
+            <span className="hidden sm:inline">Refresh Data</span>
+            <span className="sm:hidden">Refresh</span>
           </button>
         </div>
       </div>

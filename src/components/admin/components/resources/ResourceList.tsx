@@ -59,42 +59,38 @@ const ResourceList: React.FC<ResourceListProps> = ({
   }
 
   return (
-    <div className="bg-white rounded-lg shadow">
-      <div className="px-6 py-4 border-b border-gray-200">
-        <h3 className="text-lg font-medium text-gray-900">Recent Resources</h3>
+    <div className="bg-white rounded-lg shadow overflow-hidden">
+      <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-200">
+        <h3 className="text-base sm:text-lg font-medium text-gray-900">Recent Resources</h3>
       </div>
       <div className="divide-y divide-gray-200">
         {posts.map((post) => (
-          <div key={post.id} className="p-6 hover:bg-gray-50">
-            <div className="flex items-start justify-between">
-              <div className="flex-1">
-                <div className="flex items-center space-x-2 mb-2">
-                  <span className="text-sm font-medium text-blue-600">{post.category}</span>
-                  <span className="text-sm text-gray-500">•</span>
-                  <span className="text-sm text-gray-500">{post.date}</span>
+          <div key={post.id} className="p-4 sm:p-6 hover:bg-gray-50">
+            <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between space-y-4 lg:space-y-0">
+              <div className="flex-1 min-w-0">
+                <div className="flex flex-wrap items-center gap-2 mb-2">
+                  <span className="text-xs sm:text-sm font-medium text-blue-600 bg-blue-50 px-2 py-1 rounded">{post.category}</span>
+                  <span className="text-xs sm:text-sm text-gray-500">{post.date}</span>
                   {post.isManual && (
-                    <>
-                      <span className="text-sm text-gray-500">•</span>
-                      <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">
-                        Manual
-                      </span>
-                    </>
+                    <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">
+                      Manual
+                    </span>
                   )}
                 </div>
                 
-                <h4 className="text-lg font-medium text-gray-900 mb-2 line-clamp-2">
+                <h4 className="text-base sm:text-lg font-medium text-gray-900 mb-2 line-clamp-2">
                   {post.title}
                 </h4>
-                
+
                 <p className="text-gray-600 text-sm mb-3 line-clamp-2">
                   {post.excerpt}
                 </p>
 
                 {/* Tags */}
                 {post.tags && post.tags.length > 0 && (
-                  <div className="flex items-center space-x-2 mb-3">
-                    <Tag className="h-4 w-4 text-gray-400" />
-                    <div className="flex flex-wrap gap-1">
+                  <div className="flex items-start space-x-2 mb-3">
+                    <Tag className="h-4 w-4 text-gray-400 mt-0.5 flex-shrink-0" />
+                    <div className="flex flex-wrap gap-1 min-w-0">
                       {post.tags.slice(0, 3).map((tag, index) => (
                         <span
                           key={index}
@@ -124,18 +120,18 @@ const ResourceList: React.FC<ResourceListProps> = ({
                 </div>
 
                 {/* Resource URL */}
-                <div className="bg-gray-50 rounded-lg p-3 mb-3">
-                  <div className="flex items-center justify-between">
+                <div className="bg-gray-50 rounded-lg p-2 sm:p-3 mb-3">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0">
                     <div className="flex items-center space-x-2 flex-1 min-w-0">
                       <Link className="h-4 w-4 text-gray-400 flex-shrink-0" />
-                      <span className="text-sm text-gray-600 truncate">
+                      <span className="text-xs sm:text-sm text-gray-600 truncate">
                         {generateResourceUrl(post)}
                       </span>
                     </div>
-                    <div className="flex items-center space-x-2 ml-2">
+                    <div className="flex items-center space-x-2 flex-shrink-0">
                       <button
                         onClick={() => copyToClipboard(generateResourceUrl(post), post.id)}
-                        className="p-1 text-gray-400 hover:text-blue-600 transition-colors"
+                        className="p-1.5 text-gray-400 hover:text-blue-600 transition-colors rounded"
                         title="Copy URL"
                       >
                         {copiedUrl === post.id ? (
@@ -148,7 +144,7 @@ const ResourceList: React.FC<ResourceListProps> = ({
                         href={generateResourceUrl(post)}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="p-1 text-gray-400 hover:text-blue-600 transition-colors"
+                        className="p-1.5 text-gray-400 hover:text-blue-600 transition-colors rounded"
                         title="Open in new tab"
                       >
                         <ExternalLink className="h-4 w-4" />
@@ -158,17 +154,17 @@ const ResourceList: React.FC<ResourceListProps> = ({
                 </div>
 
                 {/* Engagement Stats */}
-                <div className="flex items-center space-x-4 text-sm text-gray-500">
+                <div className="flex flex-wrap items-center gap-3 sm:gap-4 text-xs sm:text-sm text-gray-500">
                   <div className="flex items-center">
-                    <Heart className="h-4 w-4 mr-1" />
+                    <Heart className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
                     {post.engagement.likes}
                   </div>
                   <div className="flex items-center">
-                    <MessageCircle className="h-4 w-4 mr-1" />
+                    <MessageCircle className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
                     {post.engagement.comments}
                   </div>
                   <div className="flex items-center">
-                    <Share2 className="h-4 w-4 mr-1" />
+                    <Share2 className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
                     {post.engagement.shares}
                   </div>
                   {post.linkedinUrl && (
@@ -178,8 +174,9 @@ const ResourceList: React.FC<ResourceListProps> = ({
                       rel="noopener noreferrer"
                       className="text-blue-600 hover:text-blue-700 inline-flex items-center"
                     >
-                      <ExternalLink className="h-4 w-4 mr-1" />
-                      LinkedIn
+                      <ExternalLink className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
+                      <span className="hidden sm:inline">LinkedIn</span>
+                      <span className="sm:hidden">LI</span>
                     </a>
                   )}
                 </div>
@@ -187,28 +184,28 @@ const ResourceList: React.FC<ResourceListProps> = ({
 
               {/* Image */}
               {post.image && (
-                <div className="ml-6 flex-shrink-0">
+                <div className="mt-4 lg:mt-0 lg:ml-6 flex-shrink-0">
                   <img
                     src={post.image}
                     alt={post.title}
-                    className="w-24 h-24 object-cover rounded-lg border border-gray-200"
+                    className="w-20 h-20 sm:w-24 sm:h-24 object-cover rounded-lg border border-gray-200"
                   />
                 </div>
               )}
             </div>
 
             {/* Actions */}
-            <div className="flex justify-end space-x-2 mt-4 pt-4 border-t border-gray-100">
+            <div className="flex justify-end space-x-2 mt-4 pt-3 sm:pt-4 border-t border-gray-100">
               <button
                 onClick={() => onEdit(post)}
-                className="text-blue-600 hover:text-blue-700 p-1"
+                className="text-blue-600 hover:text-blue-700 p-1.5 sm:p-2 rounded transition-colors"
                 title="Edit resource"
               >
                 <Pencil className="h-4 w-4" />
               </button>
               <button
                 onClick={() => onDelete(post.id)}
-                className="text-red-600 hover:text-red-700 p-1"
+                className="text-red-600 hover:text-red-700 p-1.5 sm:p-2 rounded transition-colors"
                 title="Delete resource"
               >
                 <Trash2 className="h-4 w-4" />
