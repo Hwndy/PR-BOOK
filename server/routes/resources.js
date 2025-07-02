@@ -284,6 +284,11 @@ router.post('/posts', upload.single('image'), async (req, res) => {
       console.log('Generated image URL:', image);
     }
 
+    // Validate that we have an image
+    if (!image) {
+      return res.status(400).json({ error: 'Image is required - either upload a file or provide an image URL' });
+    }
+
     // Create new resource in database
     const newResource = new Resource({
       title: title.trim(),

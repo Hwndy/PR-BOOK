@@ -1,4 +1,4 @@
-import React, { useRef, useMemo, useEffect } from 'react';
+import React, { useRef, useMemo, useCallback, useEffect } from 'react';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import './RichTextEditor.css';
@@ -19,7 +19,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
   const quillRef = useRef<ReactQuill>(null);
 
   // Custom image handler for inline images
-  const imageHandler = () => {
+  const imageHandler = useCallback(() => {
     const input = document.createElement('input');
     input.setAttribute('type', 'file');
     input.setAttribute('accept', 'image/*');
@@ -29,6 +29,17 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
       const file = input.files?.[0];
       if (file) {
         try {
+          // Show loading state
+          const quill = quillRef.current?.getEditor();
+          if (!quill) return;
+
+          const range = quill.getSelection();
+          if (!range) return;
+
+          // Insert loading placeholder
+          quill.insertText(range.index, 'Uploading image...', 'user');
+          quill.setSelection(range.index + 18);
+
           // Create FormData for upload
           const formData = new FormData();
           formData.append('image', file);
@@ -42,6 +53,9 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
             },
             body: formData
           });
+
+          // Remove loading text
+          quill.deleteText(range.index, 18);
 
           if (response.ok) {
             const data = await response.json();
@@ -64,7 +78,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
         }
       }
     };
-  };
+  }, []);
 
   // Custom link handler
   const linkHandler = () => {
@@ -226,6 +240,26 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
     return () => clearTimeout(timer);
   }, []);
 
+  // Set editor height constraints to prevent overflow
+  useEffect(() => {
+    if (quillRef.current) {
+      const editor = quillRef.current.getEditor();
+      const editorContainer = editor.container.querySelector('.ql-editor');
+      const container = editor.container.querySelector('.ql-container');
+
+      if (editorContainer) {
+        (editorContainer as HTMLElement).style.minHeight = height;
+        (editorContainer as HTMLElement).style.maxHeight = '400px';
+        (editorContainer as HTMLElement).style.overflowY = 'auto';
+      }
+
+      if (container) {
+        (container as HTMLElement).style.maxHeight = '400px';
+        (container as HTMLElement).style.overflow = 'hidden';
+      }
+    }
+  }, [height]);
+
   return (
     <div className="rich-text-editor">
       <ReactQuill
@@ -236,7 +270,12 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
         modules={modules}
         formats={formats}
         placeholder={placeholder}
-        style={{ height }}
+        style={{
+          backgroundColor: 'white',
+          borderRadius: '8px',
+          maxHeight: '400px',
+          overflow: 'hidden'
+        }}
       />
     </div>
   );
