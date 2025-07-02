@@ -20,20 +20,82 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Middleware
-app.use(cors({
-  origin: [
-    'http://localhost:5173', // Vite dev server
-    'http://localhost:3000', // Alternative dev server
-    'https://www.thescienceofpublicrelations.com', // Production frontend
-    'https://thescienceofpublicrelations.vercel.app', // Vercel frontend (backup)
-    'https://pr-book.onrender.com', // Production API
-    'https://api.thescienceofpublicrelations.com' // Legacy API domain
-  ],
+// Enhanced CORS configuration
+const corsOptions = {
+  origin: function (origin, callback) {
+    const allowedOrigins = [
+      'http://localhost:5173', // Vite dev server
+      'http://localhost:3000', // Alternative dev server
+      'https://www.thescienceofpublicrelations.com', // Production frontend
+      'https://thescienceofpublicrelations.vercel.app', // Vercel frontend (backup)
+      'https://pr-book.onrender.com', // Production API
+      'https://api.thescienceofpublicrelations.com' // Legacy API domain
+    ];
+
+    // Allow requests with no origin (mobile apps, curl, etc.)
+    if (!origin) return callback(null, true);
+
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      console.log('CORS blocked origin:', origin);
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'x-paystack-signature']
-}));
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+  allowedHeaders: [
+    'Content-Type',
+    'Authorization',
+    'x-paystack-signature',
+    'X-Requested-With',
+    'Accept',
+    'Origin'
+  ],
+  exposedHeaders: ['Content-Length', 'X-Foo', 'X-Bar'],
+  maxAge: 86400, // 24 hours
+  preflightContinue: false,
+  optionsSuccessStatus: 200
+};
+
+// Apply CORS middleware
+app.use(cors(corsOptions));
+
+// Handle preflight requests explicitly
+app.options('*', cors(corsOptions));
+
+// Additional CORS headers for all requests with logging
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  const allowedOrigins = [
+    'http://localhost:5173',
+    'http://localhost:3000',
+    'https://www.thescienceofpublicrelations.com',
+    'https://thescienceofpublicrelations.vercel.app',
+    'https://pr-book.onrender.com',
+    'https://api.thescienceofpublicrelations.com'
+  ];
+
+  // Log CORS requests for debugging
+  if (req.method === 'OPTIONS' || origin) {
+    console.log(`CORS Request: ${req.method} ${req.path} from origin: ${origin || 'no-origin'}`);
+  }
+
+  if (allowedOrigins.includes(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+    console.log(`CORS: Allowed origin ${origin}`);
+  } else if (origin) {
+    console.log(`CORS: Blocked origin ${origin}`);
+  }
+
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, x-paystack-signature, X-Requested-With, Accept, Origin');
+  res.setHeader('Access-Control-Max-Age', '86400');
+
+  next();
+});
+
 app.use(bodyParser.json());
 
 // Serve static files from uploads directory
@@ -46,6 +108,29 @@ if (!fs.existsSync(uploadsPath)) {
   fs.mkdirSync(uploadsPath, { recursive: true });
   console.log('Created uploads directory:', uploadsPath);
 }
+
+// Health check endpoint
+app.get('/api/health', (req, res) => {
+  res.json({
+    status: 'OK',
+    message: 'Server is running',
+    timestamp: new Date().toISOString(),
+    cors: 'enabled'
+  });
+});
+
+// Test CORS endpoint
+app.get('/api/test-cors', (req, res) => {
+  res.json({
+    message: 'CORS is working!',
+    origin: req.headers.origin,
+    timestamp: new Date().toISOString(),
+    headers: {
+      'access-control-allow-origin': res.getHeader('Access-Control-Allow-Origin'),
+      'access-control-allow-credentials': res.getHeader('Access-Control-Allow-Credentials')
+    }
+  });
+});
 
 // Routes
 app.use('/api/auth', authRoutes);

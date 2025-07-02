@@ -18,7 +18,12 @@ class ApiClient {
   async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
     const url = `${this.baseURL}${endpoint}`;
     const config: RequestInit = {
-      headers: this.getAuthHeaders(),
+      headers: {
+        ...this.getAuthHeaders(),
+        'Accept': 'application/json'
+      },
+      credentials: 'include',
+      mode: 'cors',
       ...options
     };
 
@@ -213,6 +218,8 @@ class ApiClient {
       headers: {
         ...(token && { Authorization: `Bearer ${token}` })
       },
+      credentials: 'include',
+      mode: 'cors',
       body: formData
     });
 
@@ -228,7 +235,9 @@ class ApiClient {
     const response = await fetch(`${this.baseURL}/api/admin/orders/export`, {
       headers: {
         ...(token && { Authorization: `Bearer ${token}` })
-      }
+      },
+      credentials: 'include',
+      mode: 'cors'
     });
     
     if (!response.ok) {

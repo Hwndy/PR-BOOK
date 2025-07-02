@@ -45,8 +45,11 @@ export const AdminProvider: React.FC<AdminProviderProps> = ({ children }) => {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        credentials: 'include',
+        mode: 'cors'
       });
 
       if (response.ok) {
@@ -75,8 +78,11 @@ export const AdminProvider: React.FC<AdminProviderProps> = ({ children }) => {
       const response = await fetch(`${API_BASE_URL}/api/auth/admin/login`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
         },
+        credentials: 'include',
+        mode: 'cors',
         body: JSON.stringify({ username, password })
       });
 
@@ -106,8 +112,11 @@ export const AdminProvider: React.FC<AdminProviderProps> = ({ children }) => {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          credentials: 'include',
+          mode: 'cors'
         });
       }
     } catch (error) {
