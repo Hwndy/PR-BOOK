@@ -37,6 +37,24 @@ const ResourceForm: React.FC<ResourceFormProps> = ({
       .substring(0, 50); // Limit slug length
   };
 
+  // Prevent accidental page refresh when there are unsaved changes
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (hasUnsavedChanges && (formData.title.trim() || formData.content.trim())) {
+        e.preventDefault();
+        e.returnValue = 'You have unsaved changes. Are you sure you want to leave?';
+        return 'You have unsaved changes. Are you sure you want to leave?';
+      }
+    };
+
+    if (isOpen) {
+      window.addEventListener('beforeunload', handleBeforeUnload);
+      return () => {
+        window.removeEventListener('beforeunload', handleBeforeUnload);
+      };
+    }
+  }, [isOpen, hasUnsavedChanges, formData.title, formData.content]);
+
   // Auto-save functionality
   const autoSave = async (data: ResourceFormData) => {
     if (!selectedPost || !data.title.trim()) return; // Only auto-save existing posts with title
@@ -130,7 +148,12 @@ const ResourceForm: React.FC<ResourceFormProps> = ({
     onImagePreviewChange(url);
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (e?: React.MouseEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+
     if (!formData.title.trim() || !formData.content.trim()) {
       alert('Title and content are required');
       return;
@@ -139,15 +162,64 @@ const ResourceForm: React.FC<ResourceFormProps> = ({
     await onSave(formData, imageUploadType === 'upload' ? imageFile || undefined : undefined);
   };
 
-  const handleClose = () => {
+  const handleClose = (e?: React.MouseEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+
+    // Check for unsaved changes
+    if (hasUnsavedChanges && (formData.title.trim() || formData.content.trim())) {
+      const confirmClose = window.confirm(
+        'You have unsaved changes. Are you sure you want to close without saving?'
+      );
+      if (!confirmClose) {
+        return;
+      }
+    }
+
     onClose();
+  };
+
+  // Prevent form submission and page refresh
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+      e.preventDefault();
+      e.stopPropagation();
+      handleSubmit();
+    } else if (e.key === 'Enter' && e.target instanceof HTMLInputElement) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+  };
+
+  const handleFormSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    return false;
   };
 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-start sm:items-center justify-center z-50 p-2 sm:p-4">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[95vh] sm:max-h-[90vh] overflow-y-auto mt-2 sm:mt-0">
+    <div
+      className="fixed inset-0 bg-black bg-opacity-50 flex items-start sm:items-center justify-center z-50 p-2 sm:p-4"
+      onClick={(e) => {
+        // Only close if clicking the backdrop, not the modal content
+        if (e.target === e.currentTarget) {
+          handleClose();
+        }
+      }}
+    >
+      <div
+        className="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[95vh] sm:max-h-[90vh] overflow-y-auto mt-2 sm:mt-0"
+        onSubmit={handleFormSubmit}
+        onKeyDown={handleKeyDown}
+        onClick={(e) => {
+          // Prevent modal from closing when clicking inside
+          e.stopPropagation();
+        }}
+      >
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center p-4 sm:p-6 border-b border-gray-200 space-y-3 sm:space-y-0">
           <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-4 min-w-0">
             <h3 className="text-base sm:text-lg font-medium text-gray-900">
@@ -189,7 +261,12 @@ const ResourceForm: React.FC<ResourceFormProps> = ({
           <div className="flex space-x-2 flex-shrink-0">
             {onPreview && (
               <button
-                onClick={onPreview}
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  onPreview();
+                }}
                 className="bg-gray-100 text-gray-700 px-3 sm:px-4 py-2 rounded-lg hover:bg-gray-200 transition-colors inline-flex items-center text-sm"
               >
                 <Eye className="h-4 w-4 mr-1 sm:mr-2" />
@@ -197,6 +274,7 @@ const ResourceForm: React.FC<ResourceFormProps> = ({
               </button>
             )}
             <button
+              type="button"
               onClick={handleClose}
               className="text-gray-400 hover:text-gray-600 p-1"
             >
@@ -457,12 +535,14 @@ const ResourceForm: React.FC<ResourceFormProps> = ({
         {/* Footer */}
         <div className="flex flex-col sm:flex-row sm:justify-end space-y-3 sm:space-y-0 sm:space-x-4 p-4 sm:p-6 border-t border-gray-200">
           <button
+            type="button"
             onClick={handleClose}
             className="w-full sm:w-auto px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors order-2 sm:order-1"
           >
             Cancel
           </button>
           <button
+            type="button"
             onClick={handleSubmit}
             disabled={saving || !formData.title || !formData.content}
             className="w-full sm:w-auto px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 inline-flex items-center justify-center order-1 sm:order-2"

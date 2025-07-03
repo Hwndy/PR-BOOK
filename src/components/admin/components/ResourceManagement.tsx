@@ -49,7 +49,25 @@ const ResourceManagement: React.FC = () => {
   const [imageUploadType, setImageUploadType] = useState<'upload' | 'url'>('url');
 
   useEffect(() => {
-    fetchResourceStats();
+    const initializeComponent = async () => {
+      try {
+        // Check authentication status first
+        const isAuthenticated = await apiClient.checkAuthStatus();
+        if (!isAuthenticated) {
+          console.error('User not authenticated');
+          alert('Authentication required. Please log in again.');
+          return;
+        }
+
+        // If authenticated, fetch resource stats
+        await fetchResourceStats();
+      } catch (error) {
+        console.error('Failed to initialize resource management:', error);
+        alert('Failed to load resource management. Please refresh the page.');
+      }
+    };
+
+    initializeComponent();
   }, []);
 
   const fetchResourceStats = async () => {
@@ -241,7 +259,12 @@ const ResourceManagement: React.FC = () => {
     } catch (error) {
       console.error('Error saving resource post:', error);
       const errorMessage = error instanceof Error ? error.message : 'Failed to save resource post';
-      alert(`Error: ${errorMessage}`);
+
+      if (errorMessage.includes('Authentication') || errorMessage.includes('403')) {
+        alert('Authentication failed. Please refresh the page and log in again.');
+      } else {
+        alert(`Error: ${errorMessage}`);
+      }
     } finally {
       setSaving(false);
     }

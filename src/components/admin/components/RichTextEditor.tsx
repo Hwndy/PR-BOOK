@@ -167,7 +167,12 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
           } else {
             const errorData = await response.text();
             console.error('Image upload failed:', response.status, errorData);
-            alert(`Failed to upload image: ${response.status} ${response.statusText}`);
+
+            if (response.status === 403) {
+              alert('Authentication failed. Please refresh the page and log in again.');
+            } else {
+              alert(`Failed to upload image: ${response.status} ${response.statusText}`);
+            }
           }
         } catch (error) {
           console.error('Error uploading image:', error);

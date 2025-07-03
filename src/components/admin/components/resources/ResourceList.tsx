@@ -130,6 +130,7 @@ const ResourceList: React.FC<ResourceListProps> = ({
                     </div>
                     <div className="flex items-center space-x-2 flex-shrink-0">
                       <button
+                        type="button"
                         onClick={() => copyToClipboard(generateResourceUrl(post), post.id)}
                         className="p-1.5 text-gray-400 hover:text-blue-600 transition-colors rounded"
                         title="Copy URL"
@@ -197,6 +198,7 @@ const ResourceList: React.FC<ResourceListProps> = ({
             {/* Actions */}
             <div className="flex justify-end space-x-2 mt-4 pt-3 sm:pt-4 border-t border-gray-100">
               <button
+                type="button"
                 onClick={() => onEdit(post)}
                 className="text-blue-600 hover:text-blue-700 p-1.5 sm:p-2 rounded transition-colors"
                 title="Edit resource"
@@ -204,6 +206,7 @@ const ResourceList: React.FC<ResourceListProps> = ({
                 <Pencil className="h-4 w-4" />
               </button>
               <button
+                type="button"
                 onClick={() => onDelete(post.id)}
                 className="text-red-600 hover:text-red-700 p-1.5 sm:p-2 rounded transition-colors"
                 title="Delete resource"

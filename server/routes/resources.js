@@ -758,4 +758,45 @@ router.get('/test-image-serving', (req, res) => {
   }
 });
 
+// Token refresh endpoint
+router.post('/refresh-token', (req, res) => {
+  try {
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1];
+
+    if (!token) {
+      return res.status(401).json({ error: 'No token provided' });
+    }
+
+    // Verify the current token (even if expired, we can still decode it)
+    jwt.verify(token, JWT_SECRET, { ignoreExpiration: true }, (err, decoded) => {
+      if (err && err.name !== 'TokenExpiredError') {
+        console.error('Token verification error:', err);
+        return res.status(403).json({ error: 'Invalid token' });
+      }
+
+      // Generate a new token with the same payload
+      const newToken = jwt.sign(
+        {
+          id: decoded.id || 'admin',
+          username: decoded.username || 'admin',
+          role: decoded.role || 'admin'
+        },
+        JWT_SECRET,
+        { expiresIn: '24h' }
+      );
+
+      console.log('Token refreshed successfully');
+      res.json({
+        success: true,
+        token: newToken,
+        message: 'Token refreshed successfully'
+      });
+    });
+  } catch (error) {
+    console.error('Token refresh error:', error);
+    res.status(500).json({ error: 'Failed to refresh token' });
+  }
+});
+
 module.exports = router;
