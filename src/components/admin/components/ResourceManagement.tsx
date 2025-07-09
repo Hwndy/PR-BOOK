@@ -89,10 +89,11 @@ const ResourceManagement: React.FC = () => {
 
       const totalEngagement = data.posts.reduce(
         (total, post) =>
-          total + (post.engagement?.likes || 0) +
-          (post.engagement?.comments || 0) +
-          (post.engagement?.shares || 0),
+          total + (post.engagement?.likes ?? 0) +
+          (post.engagement?.comments ?? 0) +
+          (post.engagement?.shares ?? 0),
         0
+        
       );
 
       setStats({

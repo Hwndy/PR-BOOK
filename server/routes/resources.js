@@ -244,7 +244,8 @@ router.get('/posts', async (req, res) => {
         publishedAt: post.publishedAt,
         linkedinUrl: post.linkedinUrl,
         image: post.image || `https://images.pexels.com/photos/${Math.floor(Math.random() * 1000000)}/pexels-photo-${Math.floor(Math.random() * 1000000)}.jpeg`,
-        engagement: post.engagement,
+        engagement: post.engagement || { likes: 0, comments: 0, shares: 0 }
+,
         isManual: false
       }));
 
@@ -607,74 +608,77 @@ router.delete('/posts/:id', authenticateToken, async (req, res) => {
 });
 
 // Get single resource post (by ID or slug)
+// Get single resource post by slug or ID
 router.get('/posts/:identifier', async (req, res) => {
+  const { identifier } = req.params;
+
   try {
-    const { identifier } = req.params;
+    // 1. Try to fetch from the database by slug or ID
+    let post = await Resource.findOne({ 'seo.slug': identifier, status: 'published' });
 
-    // Check database first - try by slug, then by ID
-    try {
-      let dbPost = null;
-
-      // First try to find by slug
-      dbPost = await Resource.findOne({ 'seo.slug': identifier, status: 'published' });
-
-      // If not found by slug, try by ID (for backward compatibility)
-      if (!dbPost) {
-        dbPost = await Resource.findById(identifier);
+    if (!post) {
+      // Try by ID as fallback (for backward compatibility)
+      if (/^[0-9a-fA-F]{24}$/.test(identifier)) {
+        post = await Resource.findById(identifier);
       }
-
-      if (dbPost) {
-        const responsePost = {
-          id: dbPost._id.toString(),
-          title: dbPost.title,
-          excerpt: dbPost.excerpt,
-          content: dbPost.content,
-          category: dbPost.category,
-          image: dbPost.image,
-          tags: dbPost.tags,
-          author: dbPost.author,
-          date: dbPost.formattedDate,
-          readTime: dbPost.readTime,
-          engagement: dbPost.engagement,
-          status: dbPost.status,
-          linkedinUrl: dbPost.linkedinUrl,
-          publishedAt: dbPost.publishedAt,
-          isManual: true,
-          seoTitle: dbPost.seo.title,
-          seoDescription: dbPost.seo.description,
-          slug: dbPost.seo.slug
-        };
-        return res.json(responsePost);
-      }
-    } catch (dbError) {
-      console.log('Database lookup failed for identifier:', identifier, dbError.message);
     }
 
-    // Check LinkedIn posts as fallback
+    if (post) {
+      const formatted = {
+        id: post._id.toString(),
+        title: post.title,
+        excerpt: post.excerpt,
+        content: post.content,
+        category: post.category,
+        image: post.image,
+        tags: post.tags,
+        author: post.author,
+        date: post.formattedDate,
+        readTime: post.readTime,
+        engagement: post.engagement,
+        status: post.status,
+        linkedinUrl: post.linkedinUrl || 'https://www.linkedin.com/in/philipodiakose/',
+        publishedAt: post.publishedAt,
+        isManual: true,
+        seoTitle: post.seo?.title || '',
+        seoDescription: post.seo?.description || '',
+        slug: post.seo?.slug || ''
+      };
+
+      return res.json({ post: formatted });
+    }
+
+    // 2. Try LinkedIn posts as fallback (if identifier is a LinkedIn post ID)
     try {
       const linkedinPosts = await getLinkedInPosts();
-      const linkedinPost = linkedinPosts.find(post => post.id === id);
+      const linkedinPost = linkedinPosts.find(p => p.id === identifier);
 
       if (linkedinPost) {
         return res.json({
-          ...linkedinPost,
-          excerpt: linkedinPost.content.length > 150 ? linkedinPost.content.substring(0, 147) + '...' : linkedinPost.content,
-          date: new Date(linkedinPost.publishedAt).toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric'
-          })
+          post: {
+            ...linkedinPost,
+            excerpt: linkedinPost.content.length > 150
+              ? linkedinPost.content.substring(0, 147) + '...'
+              : linkedinPost.content,
+            date: new Date(linkedinPost.publishedAt).toLocaleDateString('en-US', {
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric'
+            }),
+            isManual: false
+          }
         });
       }
     } catch (linkedinError) {
-      console.log('LinkedIn lookup failed:', linkedinError.message);
+      console.warn('LinkedIn fetch failed:', linkedinError.message);
     }
 
-    res.status(404).json({ error: 'Resource post not found' });
+    // 3. Not found
+    return res.status(404).json({ error: 'Resource post not found' });
 
   } catch (error) {
-    console.error('Error fetching resource post:', error);
-    res.status(500).json({ error: 'Failed to fetch resource post' });
+    console.error('Error in /posts/:identifier:', error);
+    return res.status(500).json({ error: 'Failed to fetch resource post' });
   }
 });
 
