@@ -44,26 +44,32 @@ const ResourceManagement: React.FC = () => {
     slug: ''
   });
   const [saving, setSaving] = useState(false);
+  const [notification, setNotification] = useState<{
+    type: 'success' | 'error' | 'info';
+    message: string;
+  } | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string>('');
   const [imageUploadType, setImageUploadType] = useState<'upload' | 'url'>('url');
 
+  const showNotification = (type: 'success' | 'error' | 'info', message: string) => {
+    setNotification({ type, message });
+    setTimeout(() => setNotification(null), 3000);
+  };
+
   useEffect(() => {
     const initializeComponent = async () => {
       try {
-        // Check authentication status first
         const isAuthenticated = await apiClient.checkAuthStatus();
         if (!isAuthenticated) {
-          console.error('User not authenticated');
           alert('Authentication required. Please log in again.');
           return;
         }
 
-        // If authenticated, fetch resource stats
         await fetchResourceStats();
       } catch (error) {
-        console.error('Failed to initialize resource management:', error);
-        alert('Failed to load resource management. Please refresh the page.');
+        console.error('Initialization failed:', error);
+        alert('Failed to load resource management.');
       }
     };
 
@@ -73,16 +79,19 @@ const ResourceManagement: React.FC = () => {
   const fetchResourceStats = async () => {
     try {
       setLoading(true);
-      const data = await apiClient.getResourcePosts() as ResourceAPIResponse;
+      const data = await apiClient.getResourcePosts({ all: true }) as ResourceAPIResponse;
+      // const data = await apiClient.getResourcePosts({ all: true });
 
-      if (!data || !data.posts) {
-        console.error('Invalid response format:', data);
+
+      if (!data || !Array.isArray(data.posts)) {
         throw new Error('Invalid response format from server');
       }
 
       const totalEngagement = data.posts.reduce(
-        (total: number, post: ResourcePost) =>
-          total + post.engagement.likes + post.engagement.comments + post.engagement.shares,
+        (total, post) =>
+          total + (post.engagement?.likes || 0) +
+          (post.engagement?.comments || 0) +
+          (post.engagement?.shares || 0),
         0
       );
 
@@ -97,7 +106,7 @@ const ResourceManagement: React.FC = () => {
       });
     } catch (error) {
       console.error('Error fetching resource stats:', error);
-      alert('Failed to load resource data. Please check your connection and try again.');
+      alert('Failed to load resource data.');
     } finally {
       setLoading(false);
     }
@@ -106,41 +115,30 @@ const ResourceManagement: React.FC = () => {
   const refreshResourceData = async () => {
     try {
       setRefreshing(true);
-
-      // Refresh LinkedIn cache first
       try {
-        await apiClient.request('/api/resources/refresh', {
-          method: 'POST'
-        });
+        await apiClient.request('/api/resources/refresh', { method: 'POST' });
       } catch (error) {
-        console.warn('LinkedIn refresh failed, continuing with local data refresh:', error);
+        console.warn('LinkedIn refresh failed:', error);
       }
-
-      // Fetch updated stats
       await fetchResourceStats();
-
     } catch (error) {
       console.error('Error refreshing resources:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Failed to refresh resources';
-      alert(`Error: ${errorMessage}`);
+      alert('Error refreshing resources.');
     } finally {
       setRefreshing(false);
     }
   };
 
   const handleDeletePost = async (postId: string) => {
-    if (!window.confirm('Are you sure you want to delete this resource? This action cannot be undone.')) {
-      return;
-    }
+    if (!window.confirm('Are you sure you want to delete this resource?')) return;
 
     try {
       await apiClient.deleteResourcePost(postId);
       await fetchResourceStats();
       alert('Resource deleted successfully!');
     } catch (error) {
-      console.error('Error deleting resource post:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Failed to delete resource post';
-      alert(`Error: ${errorMessage}`);
+      console.error('Error deleting post:', error);
+      alert('Failed to delete resource.');
     }
   };
 
@@ -173,20 +171,20 @@ const ResourceManagement: React.FC = () => {
   const handleEdit = (post: ResourcePost) => {
     setSelectedPost(post);
     setFormData({
-      title: post.title,
-      excerpt: post.excerpt,
-      content: post.content,
-      category: post.category,
-      imageUrl: post.image,
-      tags: post.tags?.join(', ') || '',
-      author: post.author,
-      status: post.status,
+      title: post.title || '',
+      excerpt: post.excerpt || '',
+      content: post.content || '',
+      category: post.category || '',
+      imageUrl: post.image || '',
+      tags: Array.isArray(post.tags) ? post.tags.join(', ') : '',
+      author: post.author || 'Philip Odiakose',
+      status: post.status || 'published',
       readTime: post.readTime?.toString() || '',
       seoTitle: post.seoTitle || '',
       seoDescription: post.seoDescription || '',
       slug: post.slug || ''
     });
-    setImagePreview(post.image);
+    setImagePreview(post.image || '');
     setImageFile(null);
     setImageUploadType('url');
     setIsCreateModalOpen(true);
@@ -199,22 +197,17 @@ const ResourceManagement: React.FC = () => {
   const handleSave = async (data: ResourceFormData, imageFile?: File) => {
     try {
       setSaving(true);
-
-      // Validate required fields
       if (!data.title.trim() || !data.content.trim()) {
-        alert('Title and content are required');
+        alert('Title and content are required.');
         return;
       }
 
-      // Handle image logic properly
       let finalImageUrl = '';
       if (imageUploadType === 'url' && data.imageUrl) {
         finalImageUrl = data.imageUrl;
       } else if (imageUploadType === 'upload' && imageFile) {
-        // Image file will be handled by the API
-        finalImageUrl = ''; // Will be set by server
+        finalImageUrl = ''; // will be handled by server
       } else if (imagePreview) {
-        // Use existing preview (for edits)
         finalImageUrl = imagePreview;
       }
 
@@ -223,8 +216,8 @@ const ResourceManagement: React.FC = () => {
         excerpt: data.excerpt.trim() || data.content.substring(0, 150) + '...',
         content: data.content.trim(),
         category: data.category,
-        imageUrl: finalImageUrl,
-        tags: data.tags,
+        image: finalImageUrl, // ✅ important fix
+        tags: data.tags.split(',').map(tag => tag.trim()).filter(Boolean),
         author: data.author || 'Philip Odiakose',
         status: data.status,
         readTime: data.readTime,
@@ -233,38 +226,23 @@ const ResourceManagement: React.FC = () => {
         slug: data.slug
       };
 
-      let result;
+      const imageFileToUpload = imageUploadType === 'upload' ? imageFile : undefined;
+
       if (selectedPost) {
-        // For updates, pass the image file if uploading
-        const imageFileToUpload = imageUploadType === 'upload' ? imageFile : undefined;
-        result = await apiClient.updateResourcePost(selectedPost.id, postData, imageFileToUpload);
-        console.log('Resource updated:', result);
-        alert('Resource updated successfully!');
+        await apiClient.updateResourcePost(selectedPost.id, postData, imageFileToUpload);
+        showNotification('success', 'Resource updated successfully!');
       } else {
-        // For new posts, pass the image file if uploading
-        const imageFileToUpload = imageUploadType === 'upload' ? imageFile : undefined;
-        result = await apiClient.createResourcePost(postData, imageFileToUpload);
-        console.log('Resource created:', result);
-        alert('Resource created successfully!');
+        await apiClient.createResourcePost(postData, imageFileToUpload);
+        showNotification('success', 'Resource created successfully!');
       }
 
-      // Reset form and close modals
       resetForm();
       setIsCreateModalOpen(false);
       setIsPreviewModalOpen(false);
-
-      // Refresh the data to show the new/updated post
       await fetchResourceStats();
-
     } catch (error) {
-      console.error('Error saving resource post:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Failed to save resource post';
-
-      if (errorMessage.includes('Authentication') || errorMessage.includes('403')) {
-        alert('Authentication failed. Please refresh the page and log in again.');
-      } else {
-        alert(`Error: ${errorMessage}`);
-      }
+      console.error('Error saving post:', error);
+      alert('Failed to save resource.');
     } finally {
       setSaving(false);
     }
@@ -272,7 +250,6 @@ const ResourceManagement: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      {/* Resource Stats Component */}
       <ResourceStats
         stats={stats}
         loading={loading}
@@ -281,14 +258,12 @@ const ResourceManagement: React.FC = () => {
         onCreateNew={handleCreateNew}
       />
 
-      {/* Resource List Component */}
       <ResourceList
         posts={stats?.posts || []}
         onEdit={handleEdit}
         onDelete={handleDeletePost}
       />
 
-      {/* Resource Form Modal */}
       <ResourceForm
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
@@ -306,7 +281,6 @@ const ResourceManagement: React.FC = () => {
         onImageUploadTypeChange={setImageUploadType}
       />
 
-      {/* Resource Preview Modal */}
       <ResourcePreview
         isOpen={isPreviewModalOpen}
         onClose={() => setIsPreviewModalOpen(false)}
@@ -316,6 +290,16 @@ const ResourceManagement: React.FC = () => {
         saving={saving}
         selectedPost={selectedPost}
       />
+
+      {notification && (
+        <div className={`fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg ${
+          notification.type === 'success' ? 'bg-green-500 text-white' :
+          notification.type === 'error' ? 'bg-red-500 text-white' :
+          'bg-blue-500 text-white'
+        }`}>
+          {notification.message}
+        </div>
+      )}
     </div>
   );
 };

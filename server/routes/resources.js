@@ -198,7 +198,8 @@ router.get('/posts', async (req, res) => {
     console.log('Fetching resource posts from database...');
 
     // Get manual posts from database
-    const dbPosts = await Resource.getPublished();
+   const dbPosts = await Resource.find(); // instead of Resource.getPublished()
+
     console.log('Database posts fetched:', dbPosts.length);
 
     // Convert database posts to the expected format
@@ -476,16 +477,16 @@ router.put('/posts/:id', authenticateToken, upload.single('image'), async (req, 
       slug
     } = req.body;
 
-    // Find the resource in database
+    // Find the existing resource
     const existingResource = await Resource.findById(id);
     if (!existingResource) {
       return res.status(404).json({ error: 'Resource post not found' });
     }
 
-    // Handle image - either uploaded file or URL
+    // Handle image (uploaded file or URL)
     let image = imageUrl || existingResource.image;
     if (req.file) {
-      // Delete old image if it exists and is a local upload
+      // Delete previous uploaded image if it exists
       if (existingResource.image && existingResource.image.includes('/uploads/')) {
         const oldImagePath = path.join(__dirname, '../uploads/resources', path.basename(existingResource.image));
         if (fs.existsSync(oldImagePath)) {
@@ -493,26 +494,35 @@ router.put('/posts/:id', authenticateToken, upload.single('image'), async (req, 
           console.log('Deleted old image:', oldImagePath);
         }
       }
+
       const baseUrl = getBaseUrl(req);
       image = `${baseUrl}/uploads/resources/${req.file.filename}`;
-      console.log('Resource update - environment:', process.env.NODE_ENV);
-      console.log('Resource update - base URL:', baseUrl);
-      console.log('Resource update - updated image URL:', image);
+      console.log('Updated image URL:', image);
     }
 
-    // Generate proper SEO description for update using utility function
-    const updatedSeoDesc = seoDescription ?
-      generateSeoDescription(seoDescription, excerpt, content) :
-      existingResource.seo.description;
+    // Generate SEO description fallback
+    const updatedSeoDesc = seoDescription
+      ? generateSeoDescription(seoDescription, excerpt, content)
+      : existingResource.seo.description;
 
-    // Update the resource
+    // ✅ Normalize tags
+    let normalizedTags = [];
+    if (typeof tags === 'string') {
+      normalizedTags = tags.split(',').map(tag => tag.trim()).filter(tag => tag);
+    } else if (Array.isArray(tags)) {
+      normalizedTags = tags.map(tag => tag.trim()).filter(tag => tag);
+    } else {
+      normalizedTags = existingResource.tags || [];
+    }
+
+    // Build update object
     const updateData = {
       title: (title && title.trim()) || existingResource.title,
       excerpt: (excerpt && excerpt.trim()) || existingResource.excerpt,
       content: (content && content.trim()) || existingResource.content,
       category: category || existingResource.category,
-      image: image,
-      tags: tags ? tags.split(',').map(tag => tag.trim()).filter(tag => tag) : existingResource.tags,
+      image,
+      tags: normalizedTags,
       author: author || existingResource.author,
       status: status || existingResource.status,
       readTime: readTime ? parseInt(readTime) : existingResource.readTime,
@@ -521,14 +531,15 @@ router.put('/posts/:id', authenticateToken, upload.single('image'), async (req, 
       'seo.slug': (slug && slug.trim()) || existingResource.seo.slug
     };
 
+    // Perform update
     const updatedResource = await Resource.findByIdAndUpdate(id, updateData, {
       new: true,
       runValidators: true
     });
 
-    console.log('Updated resource in database with ID:', updatedResource._id);
+    console.log('Updated resource in DB with ID:', updatedResource._id);
 
-    // Format response to match frontend expectations
+    // Format response
     const responsePost = {
       id: updatedResource._id.toString(),
       title: updatedResource.title,
@@ -554,7 +565,6 @@ router.put('/posts/:id', authenticateToken, upload.single('image'), async (req, 
       message: 'Resource post updated successfully',
       post: responsePost
     });
-
   } catch (error) {
     console.error('Error updating resource post:', error);
     res.status(500).json({ error: 'Failed to update resource post' });

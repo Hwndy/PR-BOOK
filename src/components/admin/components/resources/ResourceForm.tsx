@@ -63,7 +63,7 @@ const ResourceForm: React.FC<ResourceFormProps> = ({
       setAutoSaveStatus('saving');
 
       // Create a draft version of the data
-      const draftData = { ...data, status: 'draft' as const };
+     const draftData = { ...data, status: data.status || 'draft' };
 
       // Save as draft
       await onSave(draftData, imageUploadType === 'upload' ? imageFile || undefined : undefined);
