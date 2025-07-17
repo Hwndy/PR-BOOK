@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { BookOpen, Mic, User, MessageSquare, Calendar, ChevronRight } from 'lucide-react';
+import Hero from "../components/Hero"
 
 // Interfaces for data types
 interface ResourcePost {
@@ -153,13 +154,11 @@ const HomeSummary = () => {
   return (
     <section className="py-16 sm:py-20 md:py-24 bg-gray-50">
       <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-10">
-        <div className="text-center mb-16">
+        <div className="text-center ">
           <h2 className="text-2xl sm:text-3xl font-bold font-futura text-gray-900 mb-6 tracking-tight">
             Discover The Science of Public Relations
           </h2>
-          {/* <p className="max-w-3xl mx-auto text-base sm:text-lg text-gray-600">
-            Explore all aspects of PR measurement and evaluation through our comprehensive resources
-          </p> */}
+    
         </div>
 
         {/* About TSoPR Section */}
@@ -178,23 +177,23 @@ const HomeSummary = () => {
                 />
               </div>
               <div className="w-full sm:w-2/3 space-y-6">
-                <p className="text-base text-justify font-futura leading-relaxed tracking-wide">
+                <p className="text-base text-justify font-futura font-semibold leading-relaxed tracking-wide">
                   TheScienceOfPublicRelations.com is more than just a book title it is a movement, a mindset, and a resource hub for the future of public relations.
                   For too long, the PR and communications industry has leaned on creativity, instinct, and storytelling. But today's landscape demands more it demands proof.
                   Organizations are asking the hard questions: "So what?" and "Show me the impact." That is where we come in.
                 </p>
                 
-                <p className="text-base text-justify font-futura leading-relaxed tracking-wide">
+                <p className="text-base text-justify font-futura font-semibold leading-relaxed tracking-wide">
                   This platform is built to bridge the gap between good vibes and real results. Here, we dive deep into the science behind public relations not just through the book,
                   but through curated learnings, evolving trends, methodologies, real-world case studies, podcasts, and insights on PR performance audits, media intelligence, and measurement frameworks that matter.
                 </p>
 
-                <p className="text-base text-justify font-futura leading-relaxed tracking-wide">
+                <p className="text-base text-justify font-futura font-semibold leading-relaxed tracking-wide">
                   Whether you are a student beginning your journey, a PR executive growing your expertise, or a seasoned professional this is your space to explore and elevate your practice.
                   Authored by Philip Odiakose, a leading voice in PR measurement and evaluation.
                 </p>
 
-                <p className="text-base text-justify font-futura leading-relaxed tracking-wide">
+                <p className="text-base text-justify font-futura font-semibold leading-relaxed tracking-wide">
                   Welcome to the future of PR rooted in truth, driven by data.
                 </p>
 
@@ -202,11 +201,16 @@ const HomeSummary = () => {
                   <span className="block font-bold text-lg">Philip Odiakose</span>
                   {/* <span className="text-gray-600">Chief Media Analyst</span> */}
                 </div>
+                
               </div>
+              
             </div>
           </div>
+           <Hero />
         </div>
-
+        {/* <section className="py-16 sm:py-20 md:py-24 bg-gray-50"> */}
+         
+        {/* </section> */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
           {/* About Author Summary */}
           <div className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-all duration-300">
